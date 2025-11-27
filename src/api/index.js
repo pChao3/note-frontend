@@ -19,5 +19,5 @@ export const addNote = params => {
 };
 
 export const makePoint = id => {
-  return request.get(`${url}/api/notes/changeId/${id}`);
+  return request.put(`${url}/api/notes/${id}`);
 };
