@@ -1,6 +1,6 @@
 // src/routes.tsx
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
+import Login from './pages/Login.jsx';
 // 自动导入所有 pages 下的页面（推荐魔法写法，零维护）
 const modules = import.meta.glob('./pages/**/*.jsx', { eager: true });
 
@@ -20,7 +20,7 @@ const routes = Object.keys(modules)
   })
   .filter(Boolean);
 
-export const router = createBrowserRouter(routes);
+export const router = createBrowserRouter([{ path: '/', Component: Login }, ...routes]);
 
 export default function Routes() {
   return <RouterProvider router={router} />;
