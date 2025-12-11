@@ -34,7 +34,7 @@ export default function Note() {
     }
     try {
       const res = await addNote({ content: contentValue.trim() });
-      if (res.data.isSaved) {
+      if (res.isSaved) {
         message.success('添加成功');
         setContentValue('');
         getAllNotes();
@@ -47,8 +47,8 @@ export default function Note() {
   const toggleImportant = async id => {
     try {
       const res = await makePoint(id);
-      if (res.data.status) {
-        message.success(res.data.msg || '操作成功');
+      if (res.status) {
+        message.success(res.msg || '操作成功');
         getAllNotes();
       }
     } catch {
@@ -59,7 +59,7 @@ export default function Note() {
   const handleDelete = async id => {
     try {
       const res = await deleteNote(id);
-      if (res.data.isDeleted) {
+      if (res.isDeleted) {
         message.success('删除成功');
         getAllNotes();
       }

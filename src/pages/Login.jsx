@@ -17,13 +17,14 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   // 登录表单提交处理
-  const onLoginFinish = async ({ username, password }) => {
+  const onLoginFinish = async ({ email, password }) => {
     setLoading(true);
     try {
-      const res = await goLogin({ username, password });
+      const res = await goLogin({ email, password });
       console.log('res', res);
-      if (res.data.data) {
+      if (res.data) {
         message.success('登录成功！');
+        localStorage.setItem('token', res.token);
         navigate('/notes');
       } else {
         message.info('请先注册帐号再进行登录！');
@@ -35,13 +36,17 @@ export default function AuthPage() {
   };
 
   // 注册表单提交处理
-  const onRegisterFinish = async ({ username, password }) => {
+  const onRegisterFinish = async ({ password, email }) => {
     setLoading(true);
-    await goRegistry({ username, password });
-
-    message.success('注册成功！请登录。');
-    setLoading(false);
-    setIsLogin(true); // 注册成功后自动切换到登录页面
+    try {
+      await goRegistry({ password, email });
+      message.success('注册成功！请登录。');
+      setIsLogin(true); // 注册成功后自动切换到登录页面
+    } catch (error) {
+      message.error(error.response.data.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 第三方登录处理
@@ -89,35 +94,20 @@ export default function AuthPage() {
             layout="vertical"
             className="w-full"
           >
-            {/* {!isLogin && (
-              <Form.Item
-                label="邮箱"
-                name="email"
-                rules={[
-                  { required: true, message: '请输入邮箱!' },
-                  { type: 'email', message: '邮箱格式不正确!' },
-                ]}
-              >
-                <Input
-                  size="large"
-                  prefix={<MailOutlined className="site-form-item-icon text-gray-400" />}
-                  placeholder="您的邮箱"
-                />
-              </Form.Item>
-            )} */}
-
             <Form.Item
-              label="用户名"
-              name="username"
-              rules={[{ required: true, message: '请输入用户名!' }]}
+              label="邮箱"
+              name="email"
+              rules={[
+                { required: true, message: '请输入邮箱!' },
+                { type: 'email', message: '邮箱格式不正确!' },
+              ]}
             >
               <Input
                 size="large"
-                prefix={<UserOutlined className="site-form-item-icon text-gray-400" />}
-                placeholder="您的用户名"
+                prefix={<MailOutlined className="site-form-item-icon text-gray-400" />}
+                placeholder="您的邮箱"
               />
             </Form.Item>
-
             <Form.Item
               label="密码"
               name="password"
@@ -129,7 +119,6 @@ export default function AuthPage() {
                 placeholder="您的密码"
               />
             </Form.Item>
-
             {!isLogin && (
               <Form.Item
                 label="确认密码"
@@ -155,13 +144,11 @@ export default function AuthPage() {
                 />
               </Form.Item>
             )}
-
             {isLogin && (
               <Form.Item name="remember" valuePropName="checked">
                 <Checkbox className="text-gray-600">记住我</Checkbox>
               </Form.Item>
             )}
-
             <Form.Item>
               <Button
                 type="primary"
