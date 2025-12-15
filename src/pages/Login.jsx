@@ -12,9 +12,11 @@ import Illustration from '../assets/login.svg'; // 假设你有一个SVG插画�
 
 import { goLogin, goRegistry } from '../api/login';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authstore.js';
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const setLogin = useAuthStore(state => state.login);
   const navigate = useNavigate();
   // 登录表单提交处理
   const onLoginFinish = async ({ email, password }) => {
@@ -25,7 +27,9 @@ export default function AuthPage() {
       if (res.data) {
         message.success('登录成功！');
         localStorage.setItem('token', res.token);
-        navigate('/notes');
+        setLogin();
+
+        navigate('/dashboard');
       } else {
         message.info('请先注册帐号再进行登录！');
       }
