@@ -2,12 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 导入组件
-import Layout from './components/layout.jsx';
+import Layout from './components/Layout.jsx';
 import Login from './pages/Login'; // 假设 Login 已经移动到 pages 目录
 import Dashboard from './pages/Dashboard';
 import Timeline from './pages/Timeline';
 import EditorPage from './pages/EditorPage';
-import { useAuthStore } from './store/authstore';
+import { useAuthStore } from './store/authStore.js';
 
 // 待创建的页面骨架
 const CalendarPage = () => <div className="text-3xl p-10 dark:text-white">日历视图页 (待开发)</div>;
