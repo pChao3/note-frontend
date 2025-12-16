@@ -1,7 +1,7 @@
 import React from 'react';
 import Sidebar from './SideBar.jsx';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authstore.js';
+import { useAuthStore } from '../store/authStore.js';
 
 export default function Layout() {
   const navigate = useNavigate();
