@@ -19,6 +19,13 @@
   width: 100%;
 }
 
+.dark {
+  background-color: gray;
+}
+
+.light {
+  background-color: white;
+}
 a {
   font-weight: 500;
   color: #646cff;

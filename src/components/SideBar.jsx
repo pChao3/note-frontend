@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Calendar, ListChecks, Settings, PenLine, Sun, Moon } from 'lucide-react';
+import useThemeStore from '../store/useThemeStore';
 
 const navItems = [
   { name: '仪表盘', icon: LayoutDashboard, path: '/dashboard' },
@@ -12,14 +13,19 @@ const navItems = [
 export default function Sidebar() {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = React.useState(false); // 模拟主题切换
+  const toggleTheme = useThemeStore(state => state.toggleTheme);
+  const mode = useThemeStore(state => state.theme);
 
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev);
+    toggleTheme();
     // 实际项目中需要在这里添加 Tailwind CSS/HTML class 切换逻辑
   };
 
   return (
-    <div className="fixed w-60 h-full bg-white shadow-2xl p-4 flex flex-col justify-between border-r border-gray-100 dark:bg-gray-900 dark:border-gray-700">
+    <div
+      className={`fixed w-60 h-full bg-white shadow-2xl p-4 flex flex-col justify-between border-r border-gray-100 dark:bg-gray-900 dark:border-gray-700 ${mode}`}
+    >
       {/* 顶部：Logo 和 Slogan */}
       <div>
         <div className="flex items-center space-x-2 p-2 mb-8 border-b pb-4">
@@ -67,7 +73,7 @@ export default function Sidebar() {
           className="w-full flex items-center justify-between p-3 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
         >
           <span className="font-medium">主题切换</span>
-          {isDarkMode ? (
+          {mode === 'dark' ? (
             <Sun className="w-5 h-5 text-yellow-500" />
           ) : (
             <Moon className="w-5 h-5 text-indigo-600" />

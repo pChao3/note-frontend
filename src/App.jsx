@@ -16,7 +16,6 @@ const SettingsPage = () => <div className="text-3xl p-10 dark:text-white">设置
 // 路由保护组件
 const ProtectedRoute = ({ element }) => {
   const isLogin = useAuthStore(state => state.isLogin);
-  console.log(isLogin);
   return isLogin ? element : <Navigate to="/login" replace />;
 };
 
