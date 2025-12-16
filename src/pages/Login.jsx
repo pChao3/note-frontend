@@ -12,7 +12,7 @@ import Illustration from '../assets/login.svg'; // 假设你有一个SVG插画�
 
 import { goLogin, goRegistry } from '../api/login';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authstore.js';
+import { useAuthStore } from '../store/authStore.js';
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
