@@ -4,6 +4,7 @@ import { Save, Calendar, Sun, Heart, Tag } from 'lucide-react';
 import dayjs from 'dayjs';
 
 import { getNotes, addNote, deleteNote, makePoint } from '../api/note';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -17,6 +18,7 @@ export default function EditorPage() {
   const [content, setContent] = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
+  const navigator = useNavigate();
 
   const handleSave = async () => {
     if (!title || !content) {
@@ -37,6 +39,7 @@ export default function EditorPage() {
     console.log(params);
     try {
       await addNote(params);
+      navigator('/dashboard');
       message.success('日记已自动保存为草稿！');
     } catch (error) {
       console.log(error);

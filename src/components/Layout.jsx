@@ -22,7 +22,7 @@ export default function Layout() {
       </div>
 
       {/* 主内容区域，占据剩余空间并可滚动 */}
-      <main className={`flex-1  p-8 ${theme}`}>
+      <main className={`flex-1  p-8 ${theme} h-screen`}>
         <Outlet />
       </main>
     </div>

@@ -26,9 +26,7 @@ export default function AuthPage() {
       console.log('res', res);
       if (res.data) {
         message.success('登录成功！');
-        localStorage.setItem('token', res.token);
-        setLogin();
-
+        setLogin(res.token);
         navigate('/dashboard');
       } else {
         message.info('请先注册帐号再进行登录！');

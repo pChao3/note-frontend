@@ -103,7 +103,7 @@ export default function Timeline() {
     setIsLoading(true);
 
     const params = {
-      //   createTime: monthValue,
+      month: monthValue,
       mood: moodValue,
       tag: tagsValue,
     };

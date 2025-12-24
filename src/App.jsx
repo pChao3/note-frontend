@@ -6,12 +6,10 @@ import Layout from './components/Layout.jsx';
 import Login from './pages/Login'; // 假设 Login 已经移动到 pages 目录
 import Dashboard from './pages/Dashboard';
 import Timeline from './pages/Timeline';
+import CalendarView from './pages/CalendarPage.jsx';
+import Settings from './pages/Setting.jsx';
 import EditorPage from './pages/EditorPage';
 import { useAuthStore } from './store/authStore.js';
-
-// 待创建的页面骨架
-const CalendarPage = () => <div className="text-3xl p-10 dark:text-white">日历视图页 (待开发)</div>;
-const SettingsPage = () => <div className="text-3xl p-10 dark:text-white">设置页 (待开发)</div>;
 
 // 路由保护组件
 const ProtectedRoute = ({ element }) => {
@@ -34,8 +32,8 @@ export default function App() {
           {/* 保护路由 */}
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/timeline" element={<ProtectedRoute element={<Timeline />} />} />
-          <Route path="/calendar" element={<ProtectedRoute element={<CalendarPage />} />} />
-          <Route path="/settings" element={<ProtectedRoute element={<SettingsPage />} />} />
+          <Route path="/calendar" element={<ProtectedRoute element={<CalendarView />} />} />
+          <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
           <Route path="/editor" element={<ProtectedRoute element={<EditorPage />} />} />
         </Route>
 

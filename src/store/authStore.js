@@ -6,11 +6,13 @@ export const useAuthStore = create(
     set => ({
       isLogin: false,
       // Action：登录操作
-      login: () => {
+      login: token => {
+        localStorage.setItem('token', token);
         set({ isLogin: true });
       },
       // Action：登出操作
       logout: () => {
+        localStorage.removeItem('token');
         set({ isLogin: false });
       },
     }),

@@ -38,3 +38,29 @@ export const getAllMoods = () => {
 export const queryNote = params => {
   return request.post(`${url}/api/infos/searchNotes`, params);
 };
+// import { getNotesByMonth, getNotesByDate } from '../api/note';
+
+export const getNotesByMonth = month => {
+  return request.get(`${url}/api/infos/month-active/${month}`);
+};
+
+export const getNotesByDate = data => {
+  return request.get(`${url}/api/infos/by-date/${data}`);
+};
+
+export const getUserInfo = () => {
+  return request.get(`${url}/api/infos/getUserInfo`);
+};
+
+export const setUserInfo = params => {
+  return request.post(`${url}/api/infos/setUserInfo`, params);
+};
+
+// 上传头像（文件流）
+export const uploadAvatar = formData => {
+  return request.post(`${url}/api/infos/upload-avatar`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

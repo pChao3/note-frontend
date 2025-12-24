@@ -6,15 +6,13 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn'; // 确保在 App.jsx 或 main.jsx 中全局配置
 
+import RecentNoteItem from '../components/RecentNoteItem';
+import { MOOD_MAP } from '../components/config';
+
 dayjs.extend(relativeTime);
 // 假设 dayjs.locale('zh-cn'); 已经在应用入口设置
 
 // 默认情绪映射，以防后端返回非 happy 或 calm
-const MOOD_MAP = {
-  happy: '😄 开心',
-  calm: '😌 平静',
-  unknown: '❓ 未知', // 用于默认值
-};
 
 // 概览卡片组件 (保持不变)
 const StatCard = ({ title, value, icon: Icon, color }) => (
@@ -25,22 +23,6 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
       <Icon className={`w-7 h-7 text-${color.split('-')[1]}-500`} />
     </div>
     <p className="mt-2 text-4xl font-extrabold text-gray-900 dark:text-white">{value}</p>
-  </div>
-);
-
-// 最近日记列表项 (使用 MOOD_MAP)
-const RecentNoteItem = ({ createTime, title, content, mood }) => (
-  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-150 border-l-4 border-indigo-400">
-    <div className="flex items-center justify-between mb-2">
-      <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-        {dayjs(createTime).fromNow()}
-      </p>
-      <span className="text-xl">
-        {MOOD_MAP[mood] || '❓'} {/* 安全地获取表情 */}
-      </span>
-    </div>
-    <h4 className="text-xl font-bold text-gray-800 dark:text-white truncate">{title}</h4>
-    <p className="text-gray-600 dark:text-gray-300 line-clamp-2 mt-1">{content}</p>
   </div>
 );
 
