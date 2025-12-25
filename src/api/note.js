@@ -1,6 +1,6 @@
 import request from './request.js';
 // const url = 'http://localhost:3000';
-const url = 'https://note-express.vercel.app';
+const url = 'https://note-express-v30c.onrender.com';
 
 export const getNotes = () => {
   return request.get(`${url}/api/notes`);
