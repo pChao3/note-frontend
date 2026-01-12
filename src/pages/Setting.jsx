@@ -127,7 +127,7 @@ export default function Settings() {
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg bg-indigo-50 flex items-center justify-center">
               {avatar ? (
                 <img
-                  src={`http://localhost:3000${avatar}`}
+                  src={`https://note-express-v30c.onrender.com${avatar}`}
                   alt="avatar"
                   className="w-full h-full object-cover"
                 />
