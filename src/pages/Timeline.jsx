@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Filter, Calendar, Tag, Smile } from 'lucide-react';
-import { Select, Input, Button } from 'antd';
+import { Select, Input, Button, Spin } from 'antd';
 import {
   getNotes,
   getAllMonthes,
@@ -172,7 +172,7 @@ export default function Timeline() {
       */}
       <div className="max-w-3xl mx-auto pt-4 max-h-[75vh] overflow-y-auto">
         {isLoading ? (
-          <div className="text-center py-10">加载中...</div> // 简单加载提示
+          <Spin />
         ) : notes.length > 0 ? (
           notes.map((note, index) => <TimelineCard key={index} {...note} />)
         ) : (

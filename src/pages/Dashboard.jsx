@@ -8,6 +8,7 @@ import 'dayjs/locale/zh-cn'; // 确保在 App.jsx 或 main.jsx 中全局配置
 
 import RecentNoteItem from '../components/RecentNoteItem';
 import { MOOD_MAP } from '../components/config';
+import { Spin } from 'antd';
 
 dayjs.extend(relativeTime);
 // 假设 dayjs.locale('zh-cn'); 已经在应用入口设置
@@ -65,6 +66,7 @@ const INITIAL_STATS = [
 export default function Dashboard() {
   const [totalData, setTotalData] = useState(INITIAL_STATS);
   const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getData();
@@ -73,6 +75,7 @@ export default function Dashboard() {
 
   // 获取最近日记列表
   const getData = async () => {
+    setLoading(true);
     try {
       const res = await getNotes();
       // 安全检查：确保 res.data 是数组
@@ -84,6 +87,8 @@ export default function Dashboard() {
     } catch (error) {
       console.error('获取日记失败:', error);
       setNotes([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,48 +126,50 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-10">
-      {/* 顶部统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* 使用 totalData，现在它有了更可靠的默认值 */}
-        {totalData.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
-      </div>
+      <Spin spinning={loading}>
+        {/* 顶部统计卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 使用 totalData，现在它有了更可靠的默认值 */}
+          {totalData.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
 
-      {/* 最近日记列表 */}
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 border-b pb-3">
-          最近日记
-        </h3>
-        <div className="space-y-4">
-          {notes.length > 0 ? (
-            notes.map(note => (
-              // 确保 notes 数组中的对象有唯一的 id
-              <RecentNoteItem key={note._id || note.id || Math.random()} {...note} />
-            ))
-          ) : (
-            <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-              暂无日记记录。
+        {/* 最近日记列表 */}
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 border-b pb-3">
+            最近日记
+          </h3>
+          <div className="space-y-4">
+            {notes.length > 0 ? (
+              notes.map(note => (
+                // 确保 notes 数组中的对象有唯一的 id
+                <RecentNoteItem key={note._id || note.id || Math.random()} {...note} />
+              ))
+            ) : (
+              <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+                暂无日记记录。
+                <Link
+                  to="/editor"
+                  className="block mt-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                >
+                  现在就去写一篇 →
+                </Link>
+              </div>
+            )}
+          </div>
+          {notes.length > 0 && (
+            <div className="mt-6 text-center">
               <Link
-                to="/editor"
-                className="block mt-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                to="/timeline"
+                className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
               >
-                现在就去写一篇 →
+                查看所有日记 →
               </Link>
             </div>
           )}
         </div>
-        {notes.length > 0 && (
-          <div className="mt-6 text-center">
-            <Link
-              to="/timeline"
-              className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
-            >
-              查看所有日记 →
-            </Link>
-          </div>
-        )}
-      </div>
+      </Spin>
     </div>
   );
 }
