@@ -7,12 +7,12 @@ export const useAuthStore = create(
       isLogin: false,
       // Action：登录操作
       login: token => {
-        localStorage.setItem('token', token);
+        sessionStorage.setItem('token', token);
         set({ isLogin: true });
       },
       // Action：登出操作
       logout: () => {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         set({ isLogin: false });
       },
     }),

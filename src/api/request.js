@@ -7,7 +7,7 @@ const request = axios.create({});
 // ------------------------
 request.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,7 +30,7 @@ request.interceptors.response.use(
       const status = error.response.status;
       // Token 失效
       if (status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         window.location.href = '/login'; // 自动跳到登录
       }
     }
