@@ -38,14 +38,9 @@ export const getAllMoods = () => {
 export const queryNote = params => {
   return request.post(`${url}/api/infos/searchNotes`, params);
 };
-// import { getNotesByMonth, getNotesByDate } from '../api/note';
 
-export const getNotesByMonth = month => {
-  return request.get(`${url}/api/infos/month-active/${month}`);
-};
-
-export const getNotesByDate = data => {
-  return request.get(`${url}/api/infos/by-date/${data}`);
+export const getNotesByDate = params => {
+  return request.post(`${url}/api/infos/getNotesByDate`, params);
 };
 
 export const getUserInfo = () => {
@@ -63,4 +58,9 @@ export const uploadAvatar = formData => {
       'Content-Type': 'multipart/form-data',
     },
   });
+};
+
+//
+export const getNotesNumber = params => {
+  return request.post(`${url}/api/infos/getNotesNum`, params);
 };
