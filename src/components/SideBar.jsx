@@ -30,8 +30,8 @@ export default function Sidebar() {
       <div>
         <div className="flex items-center space-x-2 p-2 mb-8 border-b pb-4">
           <PenLine className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-xl font-extrabold text-gray-800 dark:text-white tracking-wider">
-            日记本
+          <h1 className="text-xl font-extrabold text-gray-800 dark:text-white tracking-wider mb-0!">
+            Notes
           </h1>
         </div>
 
