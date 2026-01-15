@@ -1,8 +1,8 @@
 // src/pages/Timeline.jsx
 
-import React, { useState, useEffect } from 'react';
-import { Filter, Calendar, Tag, Smile } from 'lucide-react';
-import { Select, Input, Button, Spin } from 'antd';
+import { useState, useEffect } from 'react';
+import { Filter, Tag, Trash2, PenLine } from 'lucide-react';
+import { Select, Input, Button, Spin, message } from 'antd';
 import {
   getNotes,
   getAllMonthes,
@@ -11,13 +11,15 @@ import {
   deleteNote,
   makePoint,
 } from '../api/note';
+import { Link } from 'react-router-dom';
+import { MOOD_MAP } from '../components/config';
 
 import dayjs from 'dayjs';
 const { Option } = Select;
 
 // 日记时间轴卡片
 // 注意：这里我们将 createTime 字段格式化为相对时间
-const TimelineCard = ({ createTime, title, content, mood, tag }) => {
+const TimelineCard = ({ createTime, title, content, mood, tag, id, deleteNoteById }) => {
   // 使用 dayjs 格式化时间，例如 '3 小时前'
   const formattedTime = dayjs(createTime).fromNow();
 
@@ -29,14 +31,14 @@ const TimelineCard = ({ createTime, title, content, mood, tag }) => {
 
       {/* 日期和心情：使用格式化后的时间 */}
       <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-        {formattedTime} <span className="ml-2 text-xl">{mood}</span>
+        {formattedTime} <span className="ml-2 text-xl">mood:{MOOD_MAP[mood]}</span>
       </p>
 
       {/* ... 日记内容卡片保持不变 ... */}
-      <div className="mt-2 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-indigo-500">
+      <div className="mt-2 p-6 group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-indigo-500 hover:cursor-pointer">
         <h4 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{title}</h4>
         <p className="text-gray-600 dark:text-gray-300 line-clamp-3">{content}</p>
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-3 relative">
           {tag.split(',').map((i, index) => (
             <span
               key={index}
@@ -45,6 +47,14 @@ const TimelineCard = ({ createTime, title, content, mood, tag }) => {
               {i}
             </span>
           ))}
+          <Link to={`/editor?id=${id}`}>
+            <PenLine className=" hidden group-hover:block absolute right-10" />
+          </Link>
+
+          <Trash2
+            onClick={() => deleteNoteById(id)}
+            className=" hidden group-hover:block absolute right-0 hover:text-red-500"
+          />
         </div>
       </div>
     </div>
@@ -52,7 +62,6 @@ const TimelineCard = ({ createTime, title, content, mood, tag }) => {
 };
 
 export default function Timeline() {
-  const [filter, setFilter] = useState('all');
   const [notes, setNotes] = useState([]);
   const [monthes, setMonthesArr] = useState([]);
   const [moodOption, setMoodOption] = useState([]);
@@ -112,13 +121,17 @@ export default function Timeline() {
 
     setNotes(res.data);
   };
-  const onChange = (e, key) => {
-    [key](e);
-    console.log(e);
-  };
 
-  const search = () => {
-    console.log(moodValue, monthValue, tagsValue);
+  const deleteNoteById = async id => {
+    try {
+      setIsLoading(true);
+      await deleteNote(id);
+      message.success('日记删除成功');
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+    searchNotes();
   };
 
   // ... (筛选器逻辑和数据保持不变)
@@ -174,7 +187,9 @@ export default function Timeline() {
         {isLoading ? (
           <Spin />
         ) : notes.length > 0 ? (
-          notes.map((note, index) => <TimelineCard key={index} {...note} />)
+          notes.map((note, index) => (
+            <TimelineCard key={index} {...note} deleteNoteById={deleteNoteById} />
+          ))
         ) : (
           <p className="text-center text-gray-500 dark:text-gray-400 mt-10">暂无日记记录。</p>
         )}
