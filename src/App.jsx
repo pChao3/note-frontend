@@ -9,6 +9,7 @@ import Timeline from './pages/Timeline';
 import CalendarView from './pages/CalendarPage.jsx';
 import Settings from './pages/Setting.jsx';
 import EditorPage from './pages/EditorPage';
+import Chat from './pages/Chat.jsx';
 import { useAuthStore } from './store/authStore.js';
 
 // 路由保护组件
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/timeline" element={<ProtectedRoute element={<Timeline />} />} />
           <Route path="/calendar" element={<ProtectedRoute element={<CalendarView />} />} />
+          <Route path="/chat" element={<ProtectedRoute element={<Chat />} />} />
           <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
           <Route path="/editor" element={<ProtectedRoute element={<EditorPage />} />} />
         </Route>
