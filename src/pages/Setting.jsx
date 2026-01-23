@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import useThemeStore from '../store/useThemeStore';
 import { useAuthStore } from '../store/authStore';
+import { url } from '../api/index';
 import { setUserInfo, uploadAvatar, getNotes, getUserInfo } from '../api/note'; // 假设你补充了 uploadAvatar API
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
@@ -126,11 +127,7 @@ export default function Settings() {
           <div className="relative">
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg bg-indigo-50 flex items-center justify-center">
               {avatar ? (
-                <img
-                  src={`https://note-express-v30c.onrender.com${avatar}`}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={`${url}${avatar}`} alt="avatar" className="w-full h-full object-cover" />
               ) : (
                 <User className="w-12 h-12 text-indigo-200" />
               )}

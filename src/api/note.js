@@ -1,6 +1,6 @@
 import request from './request.js';
 // const url = 'http://localhost:3000';
-const url = 'https://note-express-v30c.onrender.com';
+import { url } from './index';
 
 export const getNotes = () => {
   return request.get(`${url}/api/notes`);

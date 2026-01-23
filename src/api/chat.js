@@ -1,5 +1,6 @@
 import request from './request.js';
-const url = 'http://localhost:3000';
+// const url = 'http://localhost:3000';
+import { url } from './index.js';
 const token = sessionStorage.getItem('token');
 export const getAnswer = data => {
   return request.post(`${url}/chat/completions`, data);
