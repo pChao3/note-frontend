@@ -1,26 +1,35 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, User2, MessageSquareText } from 'lucide-react';
+import { Send, Loader2, Bot, User2, Square, MessageSquareText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'; // 支持表格、任务列表等GitHub Flavored Markdown
 
-import { getAnswer } from '../api/chat';
+import { getAnswer, fetchAnswer } from '../api/chat';
 
 const ChatPage = () => {
   const [messages, setMessages] = useState([]);
+  const [curMessage, setCurMessage] = useState('');
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
+
+  const controllerRef = useRef(null);
 
   // 自动滚动到底部
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-    console.log('message', messages);
-  }, [messages]);
+    // console.log('message', messages);
+  }, [messages, curMessage]);
+
+  const stopStream = () => {
+    console.log('hhh');
+    controllerRef.current.abort();
+  };
 
   const handleSend = async () => {
     if (input.trim() === '' || isLoading) return;
+    controllerRef.current = new AbortController();
 
     const userMessage = { id: Date.now(), content: input, role: 'user' };
 
@@ -29,18 +38,66 @@ const ChatPage = () => {
     setInput('');
     setIsLoading(true);
 
+    let streamEnded = false;
+
+    let assistantContent = '';
+
     try {
-      console.log('fetch', messages);
-      const response = await getAnswer({ messages: allMsgs });
-      console.log(response);
-      const botMessage = { id: Date.now() + 1, content: response, role: 'assistant' };
-      setMessages(prev => [...prev, botMessage]);
+      const res = await fetchAnswer(
+        {
+          signal: controllerRef.current.signal,
+        },
+        allMsgs
+      );
+      if (!res.body) {
+        throw new Error('No response body');
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n\n');
+        for (const line of lines) {
+          if (!line) continue;
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              streamEnded = true;
+              break;
+            }
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.content ?? '';
+              assistantContent += content;
+              // 更新用于实时渲染的 state
+              setCurMessage(prev => prev + content);
+            } catch (e) {
+              console.error('解析错误', e);
+            }
+          }
+        }
+
+        if (streamEnded) break;
+      }
     } catch (error) {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now() + 1, content: '发生错误，请稍后重试。', role: 'assistant' },
-      ]);
+      if (error.name === 'AbortError') {
+        console.log('用户中止');
+      } else {
+        console.error(error);
+      }
     } finally {
+      if (assistantContent) {
+        setMessages(prev => [
+          ...prev,
+          { id: Date.now(), content: assistantContent, role: 'assistant' },
+        ]);
+      }
+      // 清空临时展示内容并结束加载态
+      setCurMessage('');
       setIsLoading(false);
     }
   };
@@ -89,7 +146,7 @@ const ChatPage = () => {
               {msg.role === 'assistant' && (
                 <Bot className="w-6 h-6 flex-shrink-0 text-indigo-400 mt-0.5" />
               )}
-              <div className="prose dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:p-2 overflow-x-auto">
+              <div className="prose text-left dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:p-2 overflow-x-auto">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
               </div>
               {msg.role === 'user' && (
@@ -99,12 +156,15 @@ const ChatPage = () => {
           </div>
         ))}
 
+        {/* 实时流式渲染的助手内容，样式与历史消息保持一致 */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="flex items-center max-w-[70%] p-3 rounded-xl shadow-md space-x-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none border border-gray-100 dark:border-gray-600">
-              <Bot className="w-6 h-6 flex-shrink-0 text-indigo-400" />
-              <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-              <span className="text-sm text-gray-500">AI 正在思考...</span>
+            <div className="flex items-start max-w-[70%] p-3 rounded-xl shadow-md space-x-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none border border-gray-100 dark:border-gray-600">
+              {/* <Bot className="w-6 h-6 flex-shrink-0 text-indigo-400 mt-0.5 animate-pulse" /> */}
+              <Loader2 className="w-6 h-6 flex-shrink-0 text-indigo-400 mt-0.5 animate-spin" />
+              <div className="prose text-left dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:p-2 overflow-x-auto">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{curMessage}</ReactMarkdown>
+              </div>
             </div>
           </div>
         )}
@@ -124,15 +184,10 @@ const ChatPage = () => {
             style={{ maxHeight: '150px' }} // 限制最大高度，避免无限增长
           />
           <button
-            onClick={handleSend}
-            disabled={isLoading || input.trim() === ''}
+            onClick={isLoading ? stopStream : handleSend}
             className="p-3 !ml-8 bg-indigo-600 text-white rounded-xl shadow-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
+            {isLoading ? <Square className="w-5 h-5 " /> : <Send className="w-5 h-5" />}
           </button>
         </div>
       </div>
