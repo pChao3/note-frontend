@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import { addNote, searchNote } from '../api/note';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import VoiceInputButton from '../components/VoiceInput';
+
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -72,6 +74,14 @@ export default function EditorPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const onSend = data => {
+    console.log('data', data);
+    setTitle(data.title);
+    setMood(data.mood);
+    setTag(data.tag);
+    setContent(data.content);
   };
 
   return (
@@ -163,6 +173,8 @@ export default function EditorPage() {
             >
               {isSaving ? '正在自动保存...' : '草稿已保存'}
             </span>
+
+            <VoiceInputButton onSend={onSend} setPageStatus={e => setLoading(e)} />
             <Button
               type="primary"
               icon={<Save className="w-5 h-5 mr-1" />}

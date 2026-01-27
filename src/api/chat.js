@@ -17,3 +17,7 @@ export const fetchAnswer = (options, messages) => {
     body: JSON.stringify({ messages }),
   });
 };
+
+export const getTextByVoice = data => {
+  return request.post(`${url}/chat/asr`, data);
+};
