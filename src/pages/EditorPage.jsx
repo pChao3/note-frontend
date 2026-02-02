@@ -3,7 +3,7 @@ import { Input, Button, DatePicker, Select, message, Spin } from 'antd';
 import { Save, Calendar, Sun, Heart, Tag } from 'lucide-react';
 import dayjs from 'dayjs';
 
-import { addNote, searchNote } from '../api/note';
+import { addNote, searchNote, changeNote } from '../api/note';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import VoiceInputButton from '../components/VoiceInput';
@@ -66,7 +66,13 @@ export default function EditorPage() {
     };
     console.log(params);
     try {
-      await addNote(params);
+      const id = searchParams.get('id');
+
+      if (id) {
+        await changeNote(id, params);
+      } else {
+        await addNote(params);
+      }
       navigator('/dashboard');
       message.success('日记已自动保存为草稿！');
     } catch (error) {

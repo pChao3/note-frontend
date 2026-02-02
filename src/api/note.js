@@ -18,8 +18,8 @@ export const addNote = params => {
   return request.post(`${url}/api/notes`, params);
 };
 
-export const makePoint = id => {
-  return request.put(`${url}/api/notes/${id}`);
+export const changeNote = (id, data) => {
+  return request.put(`${url}/api/notes/${id}`, data);
 };
 
 //  infos

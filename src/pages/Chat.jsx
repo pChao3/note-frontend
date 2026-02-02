@@ -9,6 +9,8 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [curMessage, setCurMessage] = useState('');
   const [input, setInput] = useState('');
+  const [ragmode, setMode] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
 
@@ -21,6 +23,11 @@ const ChatPage = () => {
     }
     // console.log('message', messages);
   }, [messages, curMessage]);
+
+  useEffect(() => {
+    setCurMessage('');
+    setMessages([]);
+  }, [ragmode]);
 
   const stopStream = () => {
     console.log('hhh');
@@ -47,7 +54,8 @@ const ChatPage = () => {
         {
           signal: controllerRef.current.signal,
         },
-        allMsgs
+        allMsgs,
+        ragmode
       );
       if (!res.body) {
         throw new Error('No response body');
@@ -172,7 +180,11 @@ const ChatPage = () => {
 
       {/* 输入框 */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="flex items-end space-x-3 max-w-2xl mx-auto">
+        <div className="flex items-center space-x-3 max-w-2xl mx-auto">
+          <div>
+            <input type="checkbox" value={ragmode} onChange={e => setMode(e.target.value)} />
+            <label>RAG mode</label>
+          </div>
           <textarea
             className="flex-1  resize-none bg-gray-100 dark:bg-gray-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
             rows={1}
