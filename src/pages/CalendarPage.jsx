@@ -19,11 +19,9 @@ export default function CalendarView() {
 
   const dateCellRender = (value, type) => {
     const dates = Object.entries(markedDates);
-    const monthform =
-      value.month() + 1 >= 10 ? (value.month() + 1).toString() : '0' + (value.month() + 1);
-    const formType = type === 'month' ? monthform : value.date().toString();
+    const formType = value.format(type === 'month' ? 'YYYY-MM' : 'YYYY-MM-DD');
     const num = dates.find(i => {
-      return i[0].slice(-2) == formType;
+      return i[0] == formType;
     });
     if (num) {
       return (
