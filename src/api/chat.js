@@ -6,7 +6,7 @@ export const getAnswer = data => {
   return request.post(`${url}/chat/completions`, data);
 };
 
-export const fetchAnswer = (options, messages, askARG) => {
+export const fetchAnswer = (options, messages, askRAG) => {
   return fetch(`${url}/chat/completions`, {
     method: 'POST',
     ...options,
@@ -14,7 +14,7 @@ export const fetchAnswer = (options, messages, askARG) => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ messages, askARG }),
+    body: JSON.stringify({ messages, askRAG }),
   });
 };
 

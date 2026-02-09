@@ -182,7 +182,13 @@ const ChatPage = () => {
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex items-center space-x-3 max-w-2xl mx-auto">
           <div>
-            <input type="checkbox" value={ragmode} onChange={e => setMode(e.target.value)} />
+            <input
+              type="checkbox"
+              checked={ragmode}
+              onChange={e => {
+                setMode(e.target.checked);
+              }}
+            />
             <label>RAG mode</label>
           </div>
           <textarea
