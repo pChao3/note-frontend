@@ -3,14 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Filter, Tag, Trash2, PenLine } from 'lucide-react';
 import { Select, Input, Button, Spin, message } from 'antd';
-import {
-  getNotes,
-  getAllMonthes,
-  getAllMoods,
-  queryNote,
-  deleteNote,
-  makePoint,
-} from '../api/note';
+import { getNotes, getAllMonthes, getAllMoods, queryNote, deleteNote } from '../api/note';
 import { Link } from 'react-router-dom';
 import { MOOD_MAP } from '../components/config';
 

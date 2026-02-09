@@ -7,7 +7,7 @@ const navItems = [
   { name: '仪表盘', icon: LayoutDashboard, path: '/dashboard' },
   { name: '日记列表', icon: ListChecks, path: '/timeline' },
   { name: '日历视图', icon: Calendar, path: '/calendar' },
-  { name: 'AI Chat', icon: Settings, path: '/chat' },
+  { name: 'RAG Chat', icon: Settings, path: '/chat' },
   { name: '设置', icon: Settings, path: '/settings' },
 ];
 
