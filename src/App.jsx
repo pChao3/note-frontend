@@ -10,6 +10,7 @@ import CalendarView from './pages/CalendarPage.jsx';
 import Settings from './pages/Setting.jsx';
 import EditorPage from './pages/EditorPage';
 import Chat from './pages/Chat.jsx';
+import NotFound from './pages/NotFound.jsx';
 import { useAuthStore } from './store/authStore.js';
 
 // 路由保护组件
@@ -40,10 +41,7 @@ export default function App() {
         </Route>
 
         {/* 404 页面 */}
-        <Route
-          path="*"
-          element={<div className="text-center text-4xl mt-20">404 - 页面未找到</div>}
-        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

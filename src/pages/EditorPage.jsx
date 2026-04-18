@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Input, Button, DatePicker, Select, message, Spin } from 'antd';
-import { Save, Calendar, Sun, Heart, Tag } from 'lucide-react';
+import { Save, Calendar, Sun, Heart, Tag, Mic } from 'lucide-react';
 import dayjs from 'dayjs';
 
 import { addNote, searchNote, changeNote } from '../api/note';
@@ -48,6 +48,7 @@ export default function EditorPage() {
       setLoading(false);
     }
   };
+
   const handleSave = async () => {
     if (!title || !content) {
       message.error('标题和内容不能为空！');
@@ -55,7 +56,6 @@ export default function EditorPage() {
     }
 
     setIsSaving(true);
-    // 模拟后端保存 API 调用
     const params = {
       title,
       weather,
@@ -64,7 +64,6 @@ export default function EditorPage() {
       content,
       createTime: time,
     };
-    console.log(params);
     try {
       const id = searchParams.get('id');
 
@@ -74,7 +73,7 @@ export default function EditorPage() {
         await addNote(params);
       }
       navigator('/dashboard');
-      message.success('日记已自动保存为草稿！');
+      message.success('日记已保存！');
     } catch (error) {
       console.log(error);
     } finally {
@@ -83,7 +82,6 @@ export default function EditorPage() {
   };
 
   const onSend = data => {
-    console.log('data', data);
     setTitle(data.title);
     setMood(data.mood);
     setTag(data.tag);
@@ -91,28 +89,29 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="p-8 bg-gray-50 dark:bg-gray-900  flex flex-col relative">
+    <div className="bg-gray-50 dark:bg-gray-900 flex flex-col relative min-h-[calc(100vh-8rem)]">
       <Spin spinning={loading}>
-        {/* 顶部工具栏 */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex flex-wrap items-center gap-4 mb-6">
-          {/* 日期选择器 */}
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-indigo-500" />
+        {/* Toolbar */}
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-md flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          {/* Date picker */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
             <DatePicker
               defaultValue={dayjs()}
-              size="large"
+              size="middle"
               value={time}
               onChange={e => setTime(e)}
+              className="w-28 sm:w-auto"
             />
           </div>
 
-          {/* 天气选择 */}
-          <div className="flex items-center space-x-2">
-            <Sun className="w-5 h-5 text-yellow-500" />
+          {/* Weather */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
             <Select
               defaultValue="sunny"
-              style={{ width: 120 }}
-              size="large"
+              style={{ width: 90 }}
+              size="middle"
               placeholder="天气"
               value={weather}
               onChange={e => setWeather(e)}
@@ -122,13 +121,13 @@ export default function EditorPage() {
             </Select>
           </div>
 
-          {/* 心情选择 */}
-          <div className="flex items-center space-x-2">
-            <Heart className="w-5 h-5 text-red-500" />
+          {/* Mood */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
             <Select
               defaultValue="happy"
-              style={{ width: 120 }}
-              size="large"
+              style={{ width: 100 }}
+              size="middle"
               placeholder="心情"
               value={mood}
               onChange={e => setMood(e)}
@@ -138,58 +137,58 @@ export default function EditorPage() {
             </Select>
           </div>
 
-          {/* 标签输入 */}
-          <div className="flex items-center space-x-2 flex-1 min-w-[200px] justify-end">
-            <Tag className="w-5 h-5 text-green-500" />
+          {/* Tags */}
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-1 min-w-[140px]">
+            <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
             <Input
-              placeholder="输入标签 (逗号分隔)"
-              size="large"
-              className="w-full"
+              placeholder="标签 (逗号分隔)"
+              size="middle"
+              className="flex-1"
               value={tag}
               onChange={e => setTag(e.target.value)}
             />
           </div>
         </div>
 
-        {/* 标题输入 */}
+        {/* Title */}
         <Input
           placeholder="输入标题"
           value={title}
           onChange={e => setTitle(e.target.value)}
           size="large"
-          className="!text-3xl font-extrabold mb-4 p-3 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+          className="!text-xl sm:!text-3xl font-extrabold mb-3 sm:mb-4 p-2 sm:p-3 dark:bg-gray-700 dark:text-white dark:border-gray-600"
           bordered={false}
         />
 
-        {/* 正文编辑器区域 (使用 AntD TextArea 模拟) */}
+        {/* Content */}
         <TextArea
           placeholder="记录你的每一个当下..."
           value={content}
           onChange={e => setContent(e.target.value)}
-          autoSize={{ minRows: 15 }}
-          className="flex-1 text-lg  leading-relaxed p-6 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+          autoSize={{ minRows: 10 }}
+          className="flex-1 text-base sm:text-lg leading-relaxed p-4 sm:p-6 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           bordered={false}
         />
 
-        {/* 底部保存按钮和状态 */}
-        <div className=" ">
-          <div className="mt-6  flex justify-between items-center ">
-            <span
-              className={`text-sm font-medium ${isSaving ? 'text-yellow-600' : 'text-green-600'}`}
-            >
-              {isSaving ? '正在自动保存...' : '草稿已保存'}
-            </span>
+        {/* Bottom actions */}
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <span
+            className={`text-xs sm:text-sm font-medium ${isSaving ? 'text-yellow-600' : 'text-green-600'}`}
+          >
+            {isSaving ? '正在保存...' : '草稿已保存'}
+          </span>
 
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <VoiceInputButton onSend={onSend} setPageStatus={e => setLoading(e)} />
             <Button
               type="primary"
-              icon={<Save className="w-5 h-5 mr-1" />}
-              size="large"
+              icon={<Save className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />}
+              size="middle"
               onClick={handleSave}
               loading={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 !border-none font-semibold"
+              className="bg-indigo-600 hover:bg-indigo-700 !border-none font-semibold flex-1 sm:flex-none"
             >
-              {isSaving ? '保存中' : '完成并保存'}
+              {isSaving ? '保存中' : '保存'}
             </Button>
           </div>
         </div>

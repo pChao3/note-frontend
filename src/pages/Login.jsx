@@ -1,29 +1,22 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, message } from 'antd';
-import {
-  UserOutlined,
-  LockOutlined,
-  MailOutlined,
-  GoogleOutlined,
-  GithubOutlined,
-} from '@ant-design/icons';
-import Illustration from '../assets/login.svg'; // 假设你有一个SVG插画文件
-// 你可以在UnDraw (https://undraw.co/illustrations) 找到很多免费的插画。
+import { LockOutlined, MailOutlined, GoogleOutlined, GithubOutlined } from '@ant-design/icons';
+import Illustration from '../assets/login.svg';
 
 import { goLogin, goRegistry } from '../api/login';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const setLogin = useAuthStore(state => state.login);
   const navigate = useNavigate();
-  // 登录表单提交处理
+
   const onLoginFinish = async ({ email, password }) => {
     setLoading(true);
     try {
       const res = await goLogin({ email, password });
-      console.log('res', res);
       if (res.data) {
         message.success('登录成功！');
         setLogin(res.token);
@@ -37,13 +30,12 @@ export default function AuthPage() {
     }
   };
 
-  // 注册表单提交处理
   const onRegisterFinish = async ({ password, email }) => {
     setLoading(true);
     try {
       await goRegistry({ password, email });
       message.success('注册成功！请登录。');
-      setIsLogin(true); // 注册成功后自动切换到登录页面
+      setIsLogin(true);
     } catch (error) {
       message.error(error.response.data.message);
     } finally {
@@ -51,18 +43,15 @@ export default function AuthPage() {
     }
   };
 
-  // 第三方登录处理
   const handleThirdPartyLogin = platform => {
     message.info(`即将跳转到 ${platform} 登录...`);
-    // 实际项目中这里会进行OAuth跳转
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-100 p-4">
-      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl flex overflow-hidden flex-col md:flex-row">
-        {/* 左侧：插画和Slogan */}
-        <div className="md:w-1/2 p-8 flex flex-col justify-center items-center text-center bg-gradient-to-tl from-purple-500 to-indigo-500 text-white relative">
-          {/* 背景装饰：柔和的圆形或抽象形状 */}
+      <div className="max-w-4xl w-full bg-white rounded-2xl sm:rounded-3xl shadow-2xl flex overflow-hidden flex-col md:flex-row">
+        {/* Left: Illustration */}
+        <div className="hidden md:flex md:w-1/2 p-6 lg:p-8 flex-col justify-center items-center text-center bg-gradient-to-tl from-purple-500 to-indigo-500 text-white relative">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -72,22 +61,26 @@ export default function AuthPage() {
               />
             </svg>
           </div>
-          <img src={Illustration} alt="Welcome" className="w-3/4 max-w-xs mb-6 relative z-10" />
-          <h2 className="text-5xl font-extrabold mb-4 leading-tight relative z-10">
+          <img src={Illustration} alt="Welcome" className="w-3/4 max-w-xs mb-4 lg:mb-6 relative z-10" />
+          <h2 className="text-3xl lg:text-5xl font-extrabold mb-3 lg:mb-4 leading-tight relative z-10">
             记录每一个当下
           </h2>
-          <p className="text-xl font-light opacity-80 relative z-10">
+          <p className="text-base lg:text-xl font-light opacity-80 relative z-10">
             捕捉灵感，规划生活，让每一个瞬间都有迹可循。
           </p>
         </div>
 
-        {/* 右侧：登录/注册表单 */}
-        <div className="md:w-1/2 p-10 flex flex-col justify-center relative">
-          <h3 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        {/* Right: Form */}
+        <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center relative">
+          {/* Mobile logo */}
+          <div className="md:hidden text-center mb-6">
+            <h1 className="text-2xl font-bold text-indigo-600">Notes</h1>
+          </div>
+
+          <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 lg:mb-6 text-center">
             {isLogin ? '欢迎回来' : '立即注册'}
           </h3>
 
-          {/* 表单 */}
           <Form
             name={isLogin ? 'login' : 'register'}
             initialValues={{ remember: true }}
@@ -156,15 +149,15 @@ export default function AuthPage() {
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                className="w-full !h-12 text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 !border-none rounded-lg shadow-md"
+                className="w-full !h-10 sm:!h-12 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 !border-none rounded-lg shadow-md"
               >
                 {isLogin ? '登录' : '注册'}
               </Button>
             </Form.Item>
           </Form>
 
-          {/* 切换登录/注册模式 */}
-          <div className="text-center mt-6 text-gray-600">
+          {/* Toggle login/register */}
+          <div className="text-center mt-4 sm:mt-6 text-sm sm:text-base text-gray-600">
             {isLogin ? '没有账号？' : '已有账号？'}
             <button
               onClick={() => setIsLogin(!isLogin)}
@@ -174,26 +167,25 @@ export default function AuthPage() {
             </button>
           </div>
 
-          {/* 分割线 */}
-          <div className="flex items-center my-8">
+          {/* Divider */}
+          <div className="flex items-center my-6 sm:my-8">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-500 text-sm">或</span>
+            <span className="flex-shrink mx-3 sm:mx-4 text-gray-500 text-xs sm:text-sm">或</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          {/* 第三方登录 */}
-          <div className="flex justify-center gap-4">
+          {/* Third-party login */}
+          <div className="flex justify-center gap-3 sm:gap-4">
             <Button
               icon={<GoogleOutlined />}
               onClick={() => handleThirdPartyLogin('Google')}
-              className="flex items-center justify-center !w-16 !h-12 !rounded-lg text-lg text-gray-700 hover:text-red-500 !border-gray-300 hover:!border-red-300 transition-all"
+              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-lg text-base sm:text-lg text-gray-700 hover:text-red-500 !border-gray-300 hover:!border-red-300 transition-all"
             />
             <Button
               icon={<GithubOutlined />}
               onClick={() => handleThirdPartyLogin('GitHub')}
-              className="flex items-center justify-center !w-16 !h-12 !rounded-lg text-lg text-gray-700 hover:text-gray-800 !border-gray-300 hover:!border-gray-500 transition-all"
+              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-lg text-base sm:text-lg text-gray-700 hover:text-gray-800 !border-gray-300 hover:!border-gray-500 transition-all"
             />
-            {/* 可以添加更多第三方登录，例如 Twitter, Facebook 等 */}
           </div>
         </div>
       </div>

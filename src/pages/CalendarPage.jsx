@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Badge, Spin, message } from 'antd';
 import dayjs from 'dayjs';
 import { getNotesByDate, getNotesNumber } from '../api/note';
-import RecentNoteItem from '../components/RecentNoteItem'; // 复用之前的组件
+import RecentNoteItem from '../components/RecentNoteItem';
 
 export default function CalendarView() {
   const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
-  const [markedDates, setMarkedDates] = useState([]); // 存储本月有日记的日期列表
-  const [dayNotes, setDayNotes] = useState([]); // 当前选中日期的日记列表
+  const [markedDates, setMarkedDates] = useState([]);
+  const [dayNotes, setDayNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [format, setFormat] = useState('YYYY-MM-DD');
 
-  // 1. 初始化或切换月份时，获取有记录的日期（用于画小圆点）
   useEffect(() => {
     onPanelChange(selectedDate);
     onSelect(selectedDate, { source: 'date' });
@@ -25,12 +24,13 @@ export default function CalendarView() {
     });
     if (num) {
       return (
-        <div className="bg-pink-200 rounded-3xl font-bold ">
-          <Badge status="success" text={`共${num[1]}条日记！`} />
+        <div className="bg-pink-200 rounded-xl sm:rounded-3xl font-bold text-xs sm:text-base p-1 sm:p-0">
+          <Badge status="success" text={num[1] > 99 ? '99+' : `${num[1]}条`} />
         </div>
       );
     }
   };
+
   const cellRender = (current, info) => {
     if (info.type === 'date') {
       return dateCellRender(current);
@@ -46,7 +46,6 @@ export default function CalendarView() {
     if (source === 'year') {
       return;
     }
-    console.log('source', source);
     try {
       setLoading(true);
       const params = {
@@ -79,23 +78,24 @@ export default function CalendarView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       <Spin spinning={loading}>
-        {/* 日历卡片 */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl">
+        {/* Calendar card */}
+        <div className="bg-white dark:bg-gray-800 p-2 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
           <Calendar
             value={selectedDate}
             onSelect={onSelect}
             onPanelChange={onPanelChange}
             cellRender={cellRender}
-            className="w-full border-none font-sans"
+            className="w-full border-none font-sans text-sm sm:text-base"
+            fullscreen={true}
           />
         </div>
 
-        {/* 选中日期的详情列表 */}
-        <div className="space-y-4">
+        {/* Selected date notes */}
+        <div className="space-y-3 sm:space-y-4">
           {dayNotes.length > 0 && (
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white flex items-center">
               <span className="mr-2">📅</span>
               {dayjs(selectedDate).format(format)} 的记录
             </h3>

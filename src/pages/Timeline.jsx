@@ -1,5 +1,3 @@
-// src/pages/Timeline.jsx
-
 import { useState, useEffect } from 'react';
 import { Filter, Tag, Trash2, PenLine } from 'lucide-react';
 import { Select, Input, Button, Spin, message } from 'antd';
@@ -10,43 +8,36 @@ import { MOOD_MAP } from '../components/config';
 import dayjs from 'dayjs';
 const { Option } = Select;
 
-// 日记时间轴卡片
-// 注意：这里我们将 createTime 字段格式化为相对时间
 const TimelineCard = ({ createTime, title, content, mood, tag, id, deleteNoteById }) => {
-  // 使用 dayjs 格式化时间，例如 '3 小时前'
   const formattedTime = dayjs(createTime).fromNow();
 
   return (
-    <div className="relative mb-8 pl-10">
-      {/* ... 时间轴节点和线保持不变 ... */}
-      <div className="absolute left-0 top-0 w-3 h-3 rounded-full bg-indigo-500 border-4 border-indigo-200 dark:border-indigo-700 dark:bg-indigo-400"></div>
-      <div className="absolute left-1.5 top-5 bottom-0 w-0.5 bg-indigo-200 dark:bg-indigo-700"></div>
+    <div className="relative mb-6 sm:mb-8 pl-8 sm:pl-10">
+      <div className="absolute left-0 top-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-indigo-500 border-4 border-indigo-200 dark:border-indigo-700 dark:bg-indigo-400"></div>
+      <div className="absolute left-1 sm:left-1.5 top-4 sm:top-5 bottom-0 w-0.5 bg-indigo-200 dark:bg-indigo-700"></div>
 
-      {/* 日期和心情：使用格式化后的时间 */}
-      <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-        {formattedTime} <span className="ml-2 text-xl">mood:{MOOD_MAP[mood]}</span>
+      <p className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">
+        {formattedTime} <span className="ml-2 text-base sm:text-xl">mood:{MOOD_MAP[mood]}</span>
       </p>
 
-      {/* ... 日记内容卡片保持不变 ... */}
-      <div className="mt-2 p-6 group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-indigo-500 hover:cursor-pointer">
-        <h4 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{title}</h4>
-        <p className="text-gray-600 dark:text-gray-300 line-clamp-3">{content}</p>
-        <div className="flex flex-wrap gap-2 mt-3 relative">
+      <div className="mt-2 p-4 sm:p-6 group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-indigo-500 hover:cursor-pointer">
+        <h4 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2">{title}</h4>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 line-clamp-3">{content}</p>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 relative">
           {tag.split(',').map((i, index) => (
             <span
               key={index}
-              className="px-3 py-1 text-xs font-medium text-white bg-gray-500 rounded-full dark:bg-gray-600"
+              className="px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium text-white bg-gray-500 rounded-full dark:bg-gray-600"
             >
               {i}
             </span>
           ))}
-          <Link to={`/editor?id=${id}`}>
-            <PenLine className=" hidden group-hover:block absolute right-10" />
+          <Link to={`/editor?id=${id}`} className="ml-auto">
+            <PenLine className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hover:text-indigo-500" />
           </Link>
-
           <Trash2
             onClick={() => deleteNoteById(id)}
-            className=" hidden group-hover:block absolute right-0 hover:text-red-500"
+            className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hover:text-red-500 cursor-pointer"
           />
         </div>
       </div>
@@ -63,7 +54,6 @@ export default function Timeline() {
   const [moodValue, setMoodValue] = useState('');
   const [tagsValue, setTagsValue] = useState('');
 
-  // 模拟加载状态
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -74,7 +64,6 @@ export default function Timeline() {
 
   const getData = async () => {
     setIsLoading(true);
-    // 假设 getNotes 返回 { data: Array<Note> }
     const res = await getNotes();
     setNotes(res.data);
     setIsLoading(false);
@@ -83,7 +72,6 @@ export default function Timeline() {
   const getMonthes = async () => {
     const res = await getAllMonthes();
     setMonthesArr(res.data);
-    console.log(res.data);
   };
 
   const getMoods = async () => {
@@ -103,7 +91,6 @@ export default function Timeline() {
 
   const searchNotes = async () => {
     setIsLoading(true);
-
     const params = {
       month: monthValue,
       mood: moodValue,
@@ -111,7 +98,6 @@ export default function Timeline() {
     };
     const res = await queryNote(params);
     setIsLoading(false);
-
     setNotes(res.data);
   };
 
@@ -127,34 +113,43 @@ export default function Timeline() {
     searchNotes();
   };
 
-  // ... (筛选器逻辑和数据保持不变)
-
   return (
-    <div className="space-y-8 ">
-      <h2 className="text-3xl font-bold text-gray-800 dark:text-white">日记列表与归档</h2>
+    <div className="space-y-4 sm:space-y-8">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">日记列表与归档</h2>
 
-      {/* 筛选器区域 (保持不变) */}
-      <div className="flex flex-wrap gap-4 items-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-        <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-        <span className="text-gray-700 dark:text-gray-300">筛选:</span>
+      {/* Filter bar */}
+      <div className="flex flex-wrap gap-2 sm:gap-4 items-center p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+        <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
+        <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">筛选:</span>
 
-        <Select defaultValue="" style={{ width: 120 }} onChange={monthChange} size="large">
+        <Select
+          defaultValue=""
+          style={{ width: 100 }}
+          onChange={monthChange}
+          size="middle"
+          className="sm:w-32"
+        >
           <Option value="">所有月份</Option>
           {monthes.map(i => (
-            <Option value={i}>{i}</Option>
+            <Option key={i} value={i}>
+              {i}
+            </Option>
           ))}
         </Select>
 
         <Select
           defaultValue=""
-          style={{ width: 120 }}
-          size="large"
+          style={{ width: 100 }}
+          size="middle"
           onChange={moodChange}
           placeholder="心情筛选"
+          className="sm:w-32"
         >
           <Option value="">所有心情</Option>
           {moodOption.map(i => (
-            <Option value={i}>{i}</Option>
+            <Option key={i} value={i}>
+              {i}
+            </Option>
           ))}
         </Select>
 
@@ -162,23 +157,21 @@ export default function Timeline() {
           value={tagsValue}
           onChange={tagsChange}
           placeholder="标签筛选"
-          prefix={<Tag className="w-4 h-4 text-gray-400" />}
-          className="!w-48 !h-10"
+          prefix={<Tag className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />}
+          className="!w-28 sm:!w-48"
         />
 
-        <Button type="primary" onClick={searchNotes}>
-          search
+        <Button type="primary" size="small" onClick={searchNotes} className="sm:!h-10">
+          搜索
         </Button>
       </div>
 
-      {/* 核心修改区域：时间轴内容 */}
-      {/* 1. max-h-[60vh]：设置最大高度为视口高度的 60%
-        2. overflow-y-auto：超出最大高度时显示垂直滚动条
-        3. pt-4：保持顶部的间距
-      */}
-      <div className="max-w-3xl mx-auto pt-4 max-h-[75vh] overflow-y-auto">
+      {/* Timeline */}
+      <div className="max-w-3xl mx-auto pt-2 sm:pt-4 max-h-[65vh] sm:max-h-[75vh] overflow-y-auto px-1">
         {isLoading ? (
-          <Spin />
+          <div className="flex justify-center py-10">
+            <Spin />
+          </div>
         ) : notes.length > 0 ? (
           notes.map((note, index) => (
             <TimelineCard key={index} {...note} deleteNoteById={deleteNoteById} />
@@ -186,7 +179,7 @@ export default function Timeline() {
         ) : (
           <p className="text-center text-gray-500 dark:text-gray-400 mt-10">暂无日记记录。</p>
         )}
-        <p className="text-center text-gray-500 dark:text-gray-400 mt-10">--- 已加载全部 ---</p>
+        <p className="text-center text-gray-500 dark:text-gray-400 mt-6 sm:mt-10 text-sm">--- 已加载全部 ---</p>
       </div>
     </div>
   );

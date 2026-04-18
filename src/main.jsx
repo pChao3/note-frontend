@@ -28,6 +28,14 @@ import 'antd/dist/reset.css';
 // ConfigProvider 可用于定制主题、国际化等，这里暂时只做基本包裹。
 import { ConfigProvider } from 'antd';
 
+// Initialize theme from localStorage before rendering
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+  document.documentElement.classList.remove('dark');
+} else {
+  document.documentElement.classList.add('dark');
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     {/* 使用 ConfigProvider 包裹应用，确保 Ant Design 组件能正确接收主题配置。
