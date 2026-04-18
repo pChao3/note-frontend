@@ -16,7 +16,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900">
       {/* Mobile top bar */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 shadow-sm">
         <button
@@ -28,8 +28,8 @@ export default function Layout() {
         <span className="ml-3 text-lg font-bold text-gray-800 dark:text-white">Notes</span>
       </header>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:block w-60 flex-shrink-0">
+      {/* Desktop sidebar - fixed position */}
+      <div className="hidden lg:block fixed left-0 top-0 h-full w-60 flex-shrink-0 z-30">
         <Sidebar />
       </div>
 
@@ -53,7 +53,7 @@ export default function Layout() {
       )}
 
       {/* Main content */}
-      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0">
+      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>
