@@ -37,7 +37,8 @@ export default function EditorPage() {
     try {
       setLoading(true);
       const res = await searchNote(id);
-      const data = res.data[0];
+      const data = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (!data) return;
       setTitle(data.title);
       setTime(dayjs(data.createTime));
       setWeather(data.weather);
