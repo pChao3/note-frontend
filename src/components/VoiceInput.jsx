@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { message } from 'antd';
-import { Mic, X, ChevronUp } from 'lucide-react';
+import { Mic, X, ChevronUp, Square } from 'lucide-react';
 
 import { useVoiceInput } from '../hooks/VoiceInput';
 import { getTextByVoice } from '../api/chat';
@@ -10,14 +10,43 @@ const MIN_DURATION_MS = 500;
 const MAX_DURATION_MS = 60_000;
 
 /**
- * Press-and-hold voice input button. Optimized for mobile:
- *  - Uses pointer events (unifies mouse + touch), avoids double-firing
- *  - Slide-up-to-cancel gesture
- *  - Haptic-style visual feedback + live waveform + timer
- *  - Picks the best supported mime-type per browser (iOS records mp4, not webm)
- *  - Filters out taps shorter than 500ms to avoid accidental sends
+ * Detect touch-capable devices. We use this to pick the interaction model:
+ *  - Touch devices  → press-and-hold, swipe-up to cancel (WeChat style)
+ *  - Desktop        → click to start, click again to stop, ESC to cancel
+ *
+ * `matchMedia('(hover: none) and (pointer: coarse)')` is the reliable check
+ * (it tracks primary input mechanism, not just whether touch events exist).
+ */
+function useIsTouchDevice() {
+  const [isTouch, setIsTouch] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  });
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mql = window.matchMedia('(hover: none) and (pointer: coarse)');
+    const handler = e => setIsTouch(e.matches);
+    mql.addEventListener ? mql.addEventListener('change', handler) : mql.addListener(handler);
+    return () =>
+      mql.removeEventListener
+        ? mql.removeEventListener('change', handler)
+        : mql.removeListener(handler);
+  }, []);
+  return isTouch;
+}
+
+/**
+ * Voice input button — adapts interaction model to the device:
+ *  - Touch: press-and-hold + swipe-up-to-cancel
+ *  - Desktop: click to start, click to stop, ESC to cancel
+ *
+ * Both modes share:
+ *  - Best-effort mimeType detection per browser (iOS mp4, Chrome webm)
+ *  - Live waveform + timer + permission error handling
+ *  - Min 500ms / max 60s duration filters
  */
 function VoiceInputButton({ onSend, setPageStatus }) {
+  const isTouch = useIsTouchDevice();
   const {
     startRecording,
     stopRecording,
@@ -36,7 +65,6 @@ function VoiceInputButton({ onSend, setPageStatus }) {
   const cancelHoverRef = useRef(false);
   const [uploading, setUploading] = useState(false);
 
-  // Keep ref in sync so event handlers read fresh value without re-binding
   useEffect(() => {
     cancelHoverRef.current = cancelHover;
   }, [cancelHover]);
@@ -76,58 +104,95 @@ function VoiceInputButton({ onSend, setPageStatus }) {
     [onSend, setPageStatus]
   );
 
-  // ---------- Pointer lifecycle ----------
-  const onPointerDown = async e => {
-    // Only react to the first pointer
-    if (activePointerRef.current !== null) return;
-    if (e.button && e.button !== 0) return; // left-click only on mouse
-    e.preventDefault();
-    activePointerRef.current = e.pointerId;
-    startYRef.current = e.clientY;
-    setCancelHover(false);
-    try {
-      btnRef.current?.setPointerCapture?.(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-    await startRecording();
-  };
-
-  const onPointerMove = e => {
-    if (activePointerRef.current !== e.pointerId) return;
-    const dy = startYRef.current - e.clientY; // upward movement is positive
-    setCancelHover(dy > CANCEL_THRESHOLD_PX);
-  };
-
-  const finishPointer = async (e, { forceCancel = false } = {}) => {
-    if (activePointerRef.current !== e.pointerId) return;
-    activePointerRef.current = null;
-    try {
-      btnRef.current?.releasePointerCapture?.(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-
-    if (forceCancel || cancelHoverRef.current) {
-      cancelRecording();
+  const finishAndSend = useCallback(
+    async ({ forceCancel = false } = {}) => {
+      if (forceCancel) {
+        cancelRecording();
+        setCancelHover(false);
+        return;
+      }
+      const result = await stopRecording({ minDurationMs: MIN_DURATION_MS });
       setCancelHover(false);
-      return;
+      if (!result) return;
+      if (result.tooShort) {
+        message.warning('说话时间太短');
+        return;
+      }
+      sendAudio(result);
+    },
+    [cancelRecording, stopRecording, sendAudio]
+  );
+
+  // ---------- Touch: pointer lifecycle ----------
+  const onPointerDown = useCallback(
+    async e => {
+      if (activePointerRef.current !== null) return;
+      if (e.button && e.button !== 0) return;
+      e.preventDefault();
+      activePointerRef.current = e.pointerId;
+      startYRef.current = e.clientY;
+      setCancelHover(false);
+      try {
+        btnRef.current?.setPointerCapture?.(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      await startRecording();
+    },
+    [startRecording]
+  );
+
+  const onPointerMove = useCallback(e => {
+    if (activePointerRef.current !== e.pointerId) return;
+    const dy = startYRef.current - e.clientY;
+    setCancelHover(dy > CANCEL_THRESHOLD_PX);
+  }, []);
+
+  const finishPointer = useCallback(
+    async (e, { forceCancel = false } = {}) => {
+      if (activePointerRef.current !== e.pointerId) return;
+      activePointerRef.current = null;
+      try {
+        btnRef.current?.releasePointerCapture?.(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      await finishAndSend({
+        forceCancel: forceCancel || cancelHoverRef.current,
+      });
+    },
+    [finishAndSend]
+  );
+
+  const onPointerUp = useCallback(e => finishPointer(e), [finishPointer]);
+  const onPointerCancel = useCallback(
+    e => finishPointer(e, { forceCancel: true }),
+    [finishPointer]
+  );
+
+  // ---------- Desktop: click to toggle ----------
+  const onDesktopClick = useCallback(async () => {
+    if (isRecording) {
+      await finishAndSend();
+    } else {
+      await startRecording();
     }
+  }, [isRecording, startRecording, finishAndSend]);
 
-    const result = await stopRecording({ minDurationMs: MIN_DURATION_MS });
-    setCancelHover(false);
-    if (!result) return;
-    if (result.tooShort) {
-      message.warning('说话时间太短');
-      return;
-    }
-    sendAudio(result);
-  };
+  // ESC key cancels desktop recording. Also works on touch if a keyboard is connected.
+  useEffect(() => {
+    if (!isRecording) return undefined;
+    const onKey = e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelRecording();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isRecording, cancelRecording]);
 
-  const onPointerUp = e => finishPointer(e);
-  const onPointerCancel = e => finishPointer(e, { forceCancel: true });
-
-  // Safety: release pointer if component unmounts while recording
+  // Safety: stop recording if the component unmounts while active
   useEffect(
     () => () => {
       if (isRecording) cancelRecording();
@@ -141,28 +206,52 @@ function VoiceInputButton({ onSend, setPageStatus }) {
   const nearLimit = duration > MAX_DURATION_MS - 10_000;
   const busy = uploading || isProcessing;
 
+  // Pick handlers based on device type
+  const pointerHandlers = useMemo(
+    () =>
+      isTouch
+        ? {
+            onPointerDown,
+            onPointerMove,
+            onPointerUp,
+            onPointerCancel,
+          }
+        : {
+            onClick: onDesktopClick,
+          },
+    [isTouch, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onDesktopClick]
+  );
+
+  const label = (() => {
+    if (busy) return '识别中...';
+    if (isRecording) {
+      return isTouch ? '松开发送' : '点击停止';
+    }
+    return isTouch ? '按住说话' : '点击录音';
+  })();
+
   return (
     <>
       <button
         ref={btnRef}
         type="button"
-        aria-label="按住说话"
+        aria-label={label}
+        aria-pressed={isRecording}
         disabled={busy}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
         onContextMenu={e => e.preventDefault()}
+        {...pointerHandlers}
         className={`no-select tap-feedback inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-10 rounded-xl text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
           isRecording
             ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
       >
-        <Mic className="w-4 h-4" />
-        <span className="hidden sm:inline">
-          {busy ? '识别中...' : isRecording ? '松开发送' : '按住说话'}
-        </span>
+        {isRecording && !isTouch ? (
+          <Square className="w-4 h-4" />
+        ) : (
+          <Mic className="w-4 h-4" />
+        )}
+        <span className="hidden sm:inline">{label}</span>
         {isRecording && (
           <span className={`text-xs tabular-nums ${nearLimit ? 'animate-pulse' : ''}`}>
             {seconds}s
@@ -170,16 +259,15 @@ function VoiceInputButton({ onSend, setPageStatus }) {
         )}
       </button>
 
-      {/* Full-screen overlay while recording — shows waveform + cancel zone */}
-      {isRecording && (
+      {/* ---------- Touch overlay ---------- */}
+      {isRecording && isTouch && (
         <div
           className="fixed inset-0 z-[9999] flex items-end justify-center pointer-events-none safe-pb"
           aria-hidden
         >
-          {/* Dim backdrop */}
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
-          {/* Cancel hint zone (top) */}
+          {/* Cancel hint zone */}
           <div
             className={`absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center transition-all ${
               cancelHover ? 'scale-110' : ''
@@ -197,35 +285,12 @@ function VoiceInputButton({ onSend, setPageStatus }) {
             </p>
           </div>
 
-          {/* Card with waveform + timer */}
+          {/* Waveform card */}
           <div className="relative mb-32 w-72 max-w-[80vw] rounded-3xl bg-white/95 dark:bg-gray-800/95 shadow-2xl px-6 py-5 text-center">
-            <div className="flex items-center justify-center h-12 text-red-500">
-              <span
-                className="voice-bar"
-                style={{ transform: `scaleY(${0.3 + volume * 1.4})` }}
-              />
-              <span
-                className="voice-bar"
-                style={{ transform: `scaleY(${0.3 + volume * 1.2})` }}
-              />
-              <span
-                className="voice-bar"
-                style={{ transform: `scaleY(${0.3 + volume * 1.6})` }}
-              />
-              <span
-                className="voice-bar"
-                style={{ transform: `scaleY(${0.3 + volume * 1.2})` }}
-              />
-              <span
-                className="voice-bar"
-                style={{ transform: `scaleY(${0.3 + volume * 1.4})` }}
-              />
-            </div>
+            <Waveform volume={volume} />
             <p className="mt-2 text-sm tabular-nums text-gray-700 dark:text-gray-200">
               {seconds}s
-              {nearLimit && (
-                <span className="ml-2 text-red-500">剩余 {remaining}s</span>
-              )}
+              {nearLimit && <span className="ml-2 text-red-500">剩余 {remaining}s</span>}
             </p>
             <p className="mt-1 text-xs text-gray-500 flex items-center justify-center gap-1">
               <ChevronUp className="w-3 h-3" /> 上滑取消
@@ -233,7 +298,58 @@ function VoiceInputButton({ onSend, setPageStatus }) {
           </div>
         </div>
       )}
+
+      {/* ---------- Desktop inline indicator ---------- */}
+      {isRecording && !isTouch && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-4 right-4 z-[9999] flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl px-4 py-3 min-w-[260px]"
+        >
+          <span
+            className="inline-flex w-2.5 h-2.5 rounded-full bg-red-500 voice-pulse"
+            aria-hidden
+          />
+          <div className="flex-1 text-red-500">
+            <Waveform volume={volume} />
+          </div>
+          <div className="text-right">
+            <p className="text-sm tabular-nums text-gray-700 dark:text-gray-200">{seconds}s</p>
+            {nearLimit && (
+              <p className="text-[11px] text-red-500 leading-tight">剩余 {remaining}s</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={e => {
+              e.stopPropagation();
+              cancelRecording();
+            }}
+            title="取消 (Esc)"
+            aria-label="取消录音"
+            className="tap-feedback p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </>
+  );
+}
+
+function Waveform({ volume }) {
+  // A 5-bar equalizer that modulates by the mic RMS volume.
+  const scales = [1.4, 1.2, 1.6, 1.2, 1.4];
+  return (
+    <div className="flex items-center justify-center h-10 text-red-500">
+      {scales.map((s, i) => (
+        <span
+          key={i}
+          className="voice-bar"
+          style={{ transform: `scaleY(${0.3 + volume * s})` }}
+        />
+      ))}
+    </div>
   );
 }
 
