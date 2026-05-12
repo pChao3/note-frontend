@@ -93,24 +93,26 @@ export default function EditorPage() {
     <div className="bg-gray-50 dark:bg-gray-900 flex flex-col relative min-h-[calc(100vh-8rem)]">
       <Spin spinning={loading}>
         {/* Toolbar */}
-        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-md flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+          <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 rounded-xl px-2.5 py-1.5">
+            <Calendar className="w-4 h-4 text-indigo-500 flex-shrink-0" />
             <DatePicker
               value={time}
               onChange={e => setTime(e)}
-              size="middle"
-              className="w-32 sm:w-auto"
+              size="small"
+              variant="borderless"
+              className="w-28 sm:w-auto !bg-transparent"
             />
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
+          <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 rounded-xl px-2.5 py-1.5">
+            <Sun className="w-4 h-4 text-yellow-500 flex-shrink-0" />
             <Select
               value={weather}
               onChange={e => setWeather(e)}
-              size="middle"
-              style={{ width: 96 }}
+              size="small"
+              variant="borderless"
+              style={{ width: 80 }}
               placeholder="天气"
             >
               <Option value="sunny">晴天</Option>
@@ -120,13 +122,14 @@ export default function EditorPage() {
             </Select>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+          <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 rounded-xl px-2.5 py-1.5">
+            <Heart className="w-4 h-4 text-red-400 flex-shrink-0" />
             <Select
               value={mood}
               onChange={e => setMood(e)}
-              size="middle"
-              style={{ width: 108 }}
+              size="small"
+              variant="borderless"
+              style={{ width: 100 }}
               placeholder="心情"
             >
               <Option value="happy">开心 😄</Option>
@@ -136,45 +139,54 @@ export default function EditorPage() {
             </Select>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2 flex-1 min-w-[140px]">
-            <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+          <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 rounded-xl px-2.5 py-1.5 flex-1 min-w-[130px]">
+            <Tag className="w-4 h-4 text-green-500 flex-shrink-0" />
             <Input
               placeholder="标签 (逗号分隔)"
-              size="middle"
-              className="flex-1"
+              size="small"
+              variant="borderless"
+              className="flex-1 !bg-transparent"
               value={tag}
               onChange={e => setTag(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Title */}
-        <Input
-          placeholder="输入标题"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          size="large"
-          className="!text-xl sm:!text-3xl font-extrabold mb-3 sm:mb-4 p-2 sm:p-3 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-          variant="borderless"
-        />
+        {/* Content card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-4 sm:mb-5">
+          {/* Title */}
+          <div className="border-b border-gray-100 dark:border-gray-700 px-4 sm:px-6 pt-4 pb-2">
+            <Input
+              placeholder="输入标题..."
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              size="large"
+              className="!text-xl sm:!text-2xl font-extrabold !bg-transparent dark:!text-white dark:!placeholder-gray-500"
+              variant="borderless"
+            />
+          </div>
 
-        {/* Content */}
-        <TextArea
-          placeholder="记录你的每一个当下..."
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          autoSize={{ minRows: 10 }}
-          className="flex-1 text-base sm:text-lg leading-relaxed p-4 sm:p-6 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          variant="borderless"
-        />
+          {/* Content */}
+          <div className="px-4 sm:px-6 py-3">
+            <TextArea
+              placeholder="记录你的每一个当下..."
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              autoSize={{ minRows: 12 }}
+              className="flex-1 text-base sm:text-lg leading-relaxed !bg-transparent dark:!text-gray-100 dark:!placeholder-gray-500"
+              variant="borderless"
+            />
+          </div>
+        </div>
 
         {/* Bottom actions */}
-        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <span
-            className={`text-xs sm:text-sm font-medium ${
-              isSaving ? 'text-yellow-600' : 'text-green-600'
+            className={`text-xs sm:text-sm font-medium flex items-center gap-1.5 ${
+              isSaving ? 'text-amber-500' : 'text-emerald-500'
             }`}
           >
+            <span className={`inline-block w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
             {isSaving ? '正在保存...' : '草稿已保存'}
           </span>
 
@@ -182,11 +194,11 @@ export default function EditorPage() {
             <VoiceInputButton onSend={onSend} onClear={onClear} setPageStatus={e => setLoading(e)} />
             <Button
               type="primary"
-              icon={<Save className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />}
+              icon={<Save className="w-4 h-4 mr-1" />}
               size="middle"
               onClick={handleSave}
               loading={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 !border-none font-semibold"
+              className="bg-indigo-600 hover:bg-indigo-700 !border-none font-semibold shadow-md shadow-indigo-200 dark:shadow-none"
             >
               {isSaving ? '保存中' : '保存'}
             </Button>

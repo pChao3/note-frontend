@@ -78,13 +78,21 @@ export default function AuthPage() {
         {/* Right: form */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center relative">
           <div className="md:hidden text-center mb-6">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 mb-3">
+              <span className="text-white text-xl font-bold">N</span>
+            </div>
             <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-300">Notes</h1>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">记录每一个当下</p>
           </div>
 
-          <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white mb-4 lg:mb-6 text-center">
-            {isLogin ? '欢迎回来' : '立即注册'}
-          </h3>
+          <div className="mb-6 lg:mb-8 text-center">
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white">
+              {isLogin ? '欢迎回来 👋' : '创建账号 🎉'}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {isLogin ? '登录以继续记录你的生活' : '加入我们，开始记录美好时光'}
+            </p>
+          </div>
 
           <Form
             name={isLogin ? 'login' : 'register'}
@@ -158,40 +166,40 @@ export default function AuthPage() {
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                className="w-full !h-11 sm:!h-12 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 !border-none rounded-lg shadow-md"
+                className="w-full !h-11 sm:!h-12 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 !border-none rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none"
               >
                 {isLogin ? '登录' : '注册'}
               </Button>
             </Form.Item>
           </Form>
 
-          <div className="text-center mt-4 sm:mt-6 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-            {isLogin ? '没有账号?' : '已有账号?'}
+          <div className="text-center mt-4 sm:mt-5 text-sm sm:text-base text-gray-500 dark:text-gray-400">
+            {isLogin ? '还没有账号?' : '已有账号?'}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-indigo-600 hover:text-indigo-800 font-medium ml-1 transition-colors"
+              className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 font-semibold ml-1.5 transition-colors underline-offset-2 hover:underline"
             >
               {isLogin ? '立即注册' : '去登录'}
             </button>
           </div>
 
-          <div className="flex items-center my-6 sm:my-8">
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600" />
-            <span className="flex-shrink mx-3 sm:mx-4 text-gray-500 text-xs sm:text-sm">或</span>
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600" />
+          <div className="flex items-center my-5 sm:my-6">
+            <div className="flex-grow border-t border-gray-200 dark:border-gray-600" />
+            <span className="flex-shrink mx-3 sm:mx-4 text-gray-400 text-xs sm:text-sm font-medium">或使用第三方登录</span>
+            <div className="flex-grow border-t border-gray-200 dark:border-gray-600" />
           </div>
 
           <div className="flex justify-center gap-3 sm:gap-4">
             <Button
               icon={<GoogleOutlined />}
               onClick={() => handleThirdPartyLogin('Google')}
-              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-lg text-base sm:text-lg"
+              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-xl text-base sm:text-lg hover:!border-red-400 hover:!text-red-500 transition-colors"
             />
             <Button
               icon={<GithubOutlined />}
               onClick={() => handleThirdPartyLogin('GitHub')}
-              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-lg text-base sm:text-lg"
+              className="flex items-center justify-center !w-14 sm:!w-16 !h-10 sm:!h-12 !rounded-xl text-base sm:text-lg hover:!border-gray-600 hover:!text-gray-800 dark:hover:!text-white transition-colors"
             />
           </div>
         </div>

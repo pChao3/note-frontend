@@ -3,32 +3,34 @@ import { CalendarDays, Smile, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Spin } from 'antd';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/zh-cn';
 
 import { getNotes, getStatistic } from '../api/note';
 import RecentNoteItem from '../components/RecentNoteItem';
 import { MOOD_MAP } from '../components/config';
 
-dayjs.extend(relativeTime);
+// dayjs plugins are already registered globally in main.jsx
 
 // eslint-disable-next-line no-unused-vars
-const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className={`p-4 sm:p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800 border-t-4 ${color}`}>
-    <div className="flex items-center justify-between">
-      <p className="text-sm sm:text-lg font-medium text-gray-500 dark:text-gray-400">{title}</p>
-      <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-500" />
+const StatCard = ({ title, value, icon: Icon, gradient }) => (
+  <div className={`relative p-5 sm:p-6 rounded-2xl shadow-lg overflow-hidden text-white ${gradient}`}>
+    <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-white/10" />
+    <div className="absolute -right-2 -bottom-6 w-32 h-32 rounded-full bg-white/10" />
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium opacity-90">{title}</p>
+        <div className="p-2 bg-white/20 rounded-xl">
+          <Icon className="w-5 h-5" />
+        </div>
+      </div>
+      <p className="text-2xl sm:text-3xl font-extrabold break-words leading-tight">{value}</p>
     </div>
-    <p className="mt-2 text-2xl sm:text-4xl font-extrabold text-gray-900 dark:text-white break-words">
-      {value}
-    </p>
   </div>
 );
 
 const STAT_DEFS = [
-  { key: 'actNum', title: '已记录天数', icon: CalendarDays, color: 'border-blue-500' },
-  { key: 'mood', title: '主要心情概况', icon: Smile, color: 'border-yellow-500' },
-  { key: 'lastTime', title: '最近写作时间', icon: Clock, color: 'border-green-500' },
+  { key: 'actNum', title: '已记录天数', icon: CalendarDays, gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
+  { key: 'mood', title: '主要心情概况', icon: Smile, gradient: 'bg-gradient-to-br from-amber-400 to-orange-500' },
+  { key: 'lastTime', title: '最近写作时间', icon: Clock, gradient: 'bg-gradient-to-br from-emerald-400 to-teal-600' },
 ];
 
 const defaultValues = {
@@ -94,14 +96,24 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-xl mt-6 sm:mt-10">
-          <h3 className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
-            最近日记
-          </h3>
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-xl mt-6 sm:mt-10 border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 border-b border-gray-100 dark:border-gray-700 pb-3">
+            <h3 className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">
+              最近日记
+            </h3>
+            {notes.length > 0 && (
+              <Link
+                to="/timeline"
+                className="text-sm text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium transition-colors"
+              >
+                查看全部 →
+              </Link>
+            )}
+          </div>
           <div className="space-y-3 sm:space-y-4">
             {notes.length > 0 ? (
-              notes.map(note => (
-                <RecentNoteItem key={note._id || note.id || Math.random()} {...note} />
+              notes.map((note, idx) => (
+                <RecentNoteItem key={note._id || note.id || idx} {...note} />
               ))
             ) : (
               <div className="text-center py-8 sm:py-10 text-gray-500 dark:text-gray-400">

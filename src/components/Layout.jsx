@@ -17,17 +17,8 @@ export default function Layout() {
     if (!isLogin) navigate('/login', { replace: true });
   }, [isLogin, navigate]);
 
-  // Close drawer on route change. Use a layout-effect to avoid flicker.
-  const pathnameRef = location.pathname;
+  // Close drawer on route change via browser back/forward
   useEffect(() => {
-    return () => {
-      // When pathname changes, clean up by closing the drawer.
-    };
-  }, [pathnameRef]);
-  // We handle this via onClose and Link click in Sidebar; keep a guard here
-  // in case browser back/forward navigates while drawer is open.
-  useEffect(() => {
-    // Intentionally using an event-based approach: listen for popstate
     const handler = () => setMobileMenuOpen(false);
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);

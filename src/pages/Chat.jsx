@@ -108,17 +108,15 @@ const ChatPage = () => {
     <div className="flex flex-col h-[calc(100dvh-3.5rem-4rem)] lg:h-[calc(100dvh-4rem)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white -m-4 sm:-m-6 lg:-m-8">
       {/* Header */}
       <header className="flex items-center p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex-shrink-0">
-        <MessageSquareText className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-indigo-500" />
-        <h2 className="text-base sm:text-xl font-semibold">聊天机器人</h2>
-        <label className="ml-auto flex items-center gap-1.5 text-xs sm:text-sm cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={ragmode}
-            onChange={e => setMode(e.target.checked)}
-            className="rounded"
-          />
-          <span className="text-gray-600 dark:text-gray-300">RAG</span>
-        </label>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+            <MessageSquareText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-tight">聊天机器人</h2>
+            <p className="text-[10px] sm:text-xs text-emerald-500 font-medium">● 在线</p>
+          </div>
+        </div>
       </header>
 
       {/* Messages */}
@@ -139,31 +137,37 @@ const ChatPage = () => {
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
+            {msg.role === 'assistant' && (
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 mr-2 mt-0.5 shadow-sm">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+            )}
             <div
-              className={`flex items-start max-w-[85%] sm:max-w-[70%] p-2.5 sm:p-3 rounded-xl shadow-md space-x-2 sm:space-x-3 ${
+              className={`max-w-[80%] sm:max-w-[68%] px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-sm ${
                 msg.role === 'user'
-                  ? 'bg-indigo-500 text-white rounded-br-none'
-                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none border border-gray-100 dark:border-gray-600'
+                  ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm'
+                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm border border-gray-100 dark:border-gray-700'
               }`}
             >
-              {msg.role === 'assistant' && (
-                <Bot className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 text-indigo-400 mt-0.5" />
-              )}
-              <div className="prose text-left dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:p-2 overflow-x-auto text-sm sm:text-base break-words">
+              <div className="prose dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-700 prose-pre:rounded-xl prose-pre:p-3 overflow-x-auto text-sm sm:text-base break-words">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
               </div>
-              {msg.role === 'user' && (
-                <User2 className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 text-indigo-200 mt-0.5" />
-              )}
             </div>
+            {msg.role === 'user' && (
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0 ml-2 mt-0.5">
+                <User2 className="w-4 h-4 text-indigo-500" />
+              </div>
+            )}
           </div>
         ))}
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="flex items-start max-w-[85%] sm:max-w-[70%] p-2.5 sm:p-3 rounded-xl shadow-md space-x-2 sm:space-x-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none border border-gray-100 dark:border-gray-600">
-              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 text-indigo-400 mt-0.5 animate-spin" />
-              <div className="prose text-left dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:p-2 overflow-x-auto text-sm sm:text-base break-words min-h-[1.5em]">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 mr-2 mt-0.5 shadow-sm">
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+            </div>
+            <div className="max-w-[80%] sm:max-w-[68%] px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl rounded-bl-sm shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700">
+              <div className="prose dark:prose-invert prose-p:my-1 prose-li:my-1 prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-700 prose-pre:rounded-xl prose-pre:p-3 overflow-x-auto text-sm sm:text-base break-words min-h-[1.5em]">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {curMessage || ' '}
                 </ReactMarkdown>
@@ -175,22 +179,43 @@ const ChatPage = () => {
 
       {/* Input */}
       <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-pb">
-        <div className="flex items-end gap-2 max-w-3xl mx-auto">
-          <textarea
-            className="flex-1 resize-none bg-gray-100 dark:bg-gray-700 rounded-xl p-2.5 sm:p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base"
-            rows={1}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={isLoading ? 'AI 正在回复...' : '请输入你的消息...'}
-            disabled={isLoading}
-            style={{ maxHeight: '120px' }}
-          />
+        <div className="flex items-center gap-2 max-w-3xl mx-auto">
+          {/* RAG toggle */}
+          <button
+            type="button"
+            onClick={() => setMode(v => !v)}
+            title={ragmode ? '已开启 RAG 知识库模式' : '点击开启 RAG 知识库模式'}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+              ragmode
+                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-transparent hover:border-gray-300 dark:hover:border-gray-500'
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${ragmode ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+            RAG
+          </button>
+
+          <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-400 transition-shadow">
+            <textarea
+              className="w-full resize-none bg-transparent px-3 py-2.5 focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm sm:text-base leading-6"
+              rows={1}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={isLoading ? 'AI 正在回复...' : '请输入你的消息...'}
+              disabled={isLoading}
+              style={{ maxHeight: '120px' }}
+            />
+          </div>
           <button
             type="button"
             onClick={isLoading ? stopStream : handleSend}
             aria-label={isLoading ? '停止回复' : '发送'}
-            className="tap-feedback p-2.5 sm:p-3 bg-indigo-600 text-white rounded-xl shadow-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed flex-shrink-0"
+            className={`tap-feedback p-2.5 sm:p-3 rounded-2xl shadow-md transition-colors flex-shrink-0 ${
+              isLoading
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
           >
             {isLoading ? (
               <Square className="w-4 h-4 sm:w-5 sm:h-5" />
