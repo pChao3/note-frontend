@@ -56,6 +56,7 @@ function VoiceInputButton({ onSend, setPageStatus }) {
     duration,
     volume,
     error,
+    markIdle,
   } = useVoiceInput({ maxDurationMs: MAX_DURATION_MS });
 
   const btnRef = useRef(null);
@@ -124,9 +125,10 @@ function VoiceInputButton({ onSend, setPageStatus }) {
       } finally {
         setUploading(false);
         setPageStatus?.(false);
+        markIdle();
       }
     },
-    [onSend, setPageStatus]
+    [onSend, setPageStatus, markIdle]
   );
 
   const finishAndSend = useCallback(
@@ -252,7 +254,6 @@ function VoiceInputButton({ onSend, setPageStatus }) {
   );
 
   const label = (() => {
-    if (busy) return '识别中...';
     if (isRecording) {
       return isTouch ? '松开发送' : '点击停止';
     }
@@ -266,21 +267,24 @@ function VoiceInputButton({ onSend, setPageStatus }) {
         type="button"
         aria-label={label}
         aria-pressed={isRecording}
-        disabled={busy}
         onContextMenu={e => e.preventDefault()}
         {...pointerHandlers}
-        className={`no-select tap-feedback inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-10 rounded-xl text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+        className={`no-select tap-feedback inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-10 rounded-xl text-sm font-medium transition-colors ${
           isRecording
             ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
-            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+            : busy
+              ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
       >
         {isRecording && !isTouch ? (
           <Square className="w-4 h-4" />
+        ) : busy ? (
+          <Mic className="w-4 h-4 animate-pulse" />
         ) : (
           <Mic className="w-4 h-4" />
         )}
-        <span className="hidden sm:inline">{label}</span>
+        <span className="hidden sm:inline">{busy ? '识别中...' : label}</span>
         {isRecording && (
           <span className={`text-xs tabular-nums ${nearLimit ? 'animate-pulse' : ''}`}>
             {seconds}s
