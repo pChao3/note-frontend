@@ -12,7 +12,7 @@ const applyTheme = theme => {
 const useThemeStore = create(
   persist(
     set => ({
-      theme: 'dark',
+      theme: 'light',
       toggleTheme: () => {
         set(state => {
           const newTheme = state.theme === 'light' ? 'dark' : 'light';
