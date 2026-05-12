@@ -28,6 +28,10 @@ function pickMimeType() {
   return { mimeType: '', format: 'webm' };
 }
 
+// Max payload size the backend accepts (in bytes, before base64).
+// base64 inflates by ~33%, so if backend limit is 1MB, raw audio max ~750KB.
+const MAX_BLOB_SIZE_BYTES = 750 * 1024;
+
 /**
  * Voice input hook.
  * Exposes start / stop / cancel plus live `duration`, `volume` and `status`.
@@ -113,7 +117,12 @@ export function useVoiceInput({ maxDurationMs = 60_000 } = {}) {
 
       const { mimeType, format } = pickMimeType();
       formatRef.current = format;
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      // Use a low bitrate (32kbps) to keep the payload small and avoid the
+      // backend's "request entity too large" error. Speech is intelligible
+      // well below what MediaRecorder defaults to (~128kbps).
+      const recorderOptions = { audioBitsPerSecond: 32000 };
+      if (mimeType) recorderOptions.mimeType = mimeType;
+      const recorder = new MediaRecorder(stream, recorderOptions);
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
 
@@ -209,8 +218,24 @@ export function useVoiceInput({ maxDurationMs = 60_000 } = {}) {
             return;
           }
 
+          // Guard: reject blobs that would exceed the backend payload limit,
+          // so we never even attempt to send "request entity too large".
+          if (blob.size > MAX_BLOB_SIZE_BYTES) {
+            setStatus('idle');
+            resolve({
+              tooShort: false,
+              tooLarge: true,
+              blob: null,
+              format: formatRef.current,
+              durationMs: elapsed,
+              blobSize: blob.size,
+            });
+            return;
+          }
+
           resolve({
             tooShort: false,
+            tooLarge: false,
             blob,
             format: formatRef.current,
             mimeType,
