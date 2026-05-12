@@ -7,7 +7,7 @@ import { getTextByVoice } from '../api/chat';
 
 const CANCEL_THRESHOLD_PX = 60; // slide up this far to cancel (WeChat-style)
 const MIN_DURATION_MS = 500;
-const MAX_DURATION_MS = 60_000;
+const MAX_DURATION_MS = 30_000;
 
 /**
  * Detect touch-capable devices. We use this to pick the interaction model:
@@ -88,14 +88,39 @@ function VoiceInputButton({ onSend, setPageStatus }) {
       try {
         const base64Audio = await blobToBase64(blob);
         const res = await getTextByVoice({ audioData: base64Audio, format });
+
+        // Business-level error responses (HTTP 200, shape: { status, message })
+        if (res?.status === 'error') {
+          const errMsg = String(res.message || '').toLowerCase();
+          if (errMsg.includes('too large') || errMsg.includes('entity too large')) {
+            message.error('录音文件过大,请缩短录音时长后重试（建议 15 秒以内）');
+          } else if (errMsg.includes('timeout') || errMsg.includes('timed out')) {
+            message.error('语音识别超时,请重试');
+          } else {
+            message.error(res.message || '语音识别失败,请重试');
+          }
+          return;
+        }
+
         if (res.msg !== 'ok') {
-          message.info(res.msg || '识别失败');
+          message.info(res.msg || '识别失败,请重试');
         } else {
           onSend?.(res.data);
         }
       } catch (err) {
         console.error('语音识别请求失败', err);
-        message.error(err?.message || '语音识别请求失败');
+        // HTTP-level errors (413 Payload Too Large, timeouts, offline, ...)
+        const httpStatus = err?.response?.status;
+        const serverMsg = String(err?.response?.data?.message || '').toLowerCase();
+        if (httpStatus === 413 || serverMsg.includes('too large')) {
+          message.error('录音文件过大,请缩短录音时长后重试（建议 15 秒以内）');
+        } else if (httpStatus === 408 || err?.code === 'ECONNABORTED') {
+          message.error('请求超时,请检查网络后重试');
+        } else if (!navigator.onLine) {
+          message.error('网络已断开,请恢复网络后重试');
+        } else {
+          message.error(err?.response?.data?.message || err?.message || '语音识别请求失败');
+        }
       } finally {
         setUploading(false);
         setPageStatus?.(false);
@@ -116,6 +141,10 @@ function VoiceInputButton({ onSend, setPageStatus }) {
       if (!result) return;
       if (result.tooShort) {
         message.warning('说话时间太短');
+        return;
+      }
+      if (result.tooLarge) {
+        message.error('录音文件过大,请缩短录音时长（建议 15 秒以内）');
         return;
       }
       sendAudio(result);
