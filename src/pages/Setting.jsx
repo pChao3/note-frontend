@@ -57,8 +57,8 @@ export default function Settings() {
         setAvatar(res.url);
         message.success('头像上传成功');
       }
-    } catch (error) {
-      console.log(error);
+    } catch {
+      console.error('头像上传失败');
       message.error('头像上传失败');
     } finally {
       setIsUploading(false);
@@ -73,7 +73,7 @@ export default function Settings() {
       if (res.status === 'ok') {
         message.success('资料更新成功！');
       }
-    } catch (error) {
+    } catch {
       message.error('更新失败');
     } finally {
       setIsSaving(false);
@@ -95,7 +95,7 @@ export default function Settings() {
       link.href = dataUri;
       link.download = `diary-backup-${new Date().toLocaleDateString()}.json`;
       link.click();
-    } catch (error) {
+    } catch {
       message.error('导出失败');
     }
   };
