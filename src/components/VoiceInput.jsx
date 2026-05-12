@@ -7,7 +7,7 @@ import { getTextByVoice } from '../api/chat';
 
 const CANCEL_THRESHOLD_PX = 60; // slide up this far to cancel (WeChat-style)
 const MIN_DURATION_MS = 500;
-const MAX_DURATION_MS = 60_000;
+const MAX_DURATION_MS = 30_000;
 
 /**
  * Detect touch-capable devices. We use this to pick the interaction model:
@@ -88,14 +88,40 @@ function VoiceInputButton({ onSend, setPageStatus }) {
       try {
         const base64Audio = await blobToBase64(blob);
         const res = await getTextByVoice({ audioData: base64Audio, format });
+
+        // Handle API-level error responses (HTTP 200 but business-level error)
+        if (res.status === 'error') {
+          const errMsg = res.message || '语音识别失败';
+          // Provide user-friendly messages for known error codes
+          if (errMsg.includes('too large') || errMsg.includes('entity too large')) {
+            message.error('录音文件过大,请缩短录音时长后重试（建议 30 秒以内）');
+          } else if (errMsg.includes('timeout') || errMsg.includes('timed out')) {
+            message.error('语音识别超时,请重试');
+          } else {
+            message.error(errMsg);
+          }
+          return;
+        }
+
         if (res.msg !== 'ok') {
-          message.info(res.msg || '识别失败');
+          message.info(res.msg || '识别失败,请重试');
         } else {
           onSend?.(res.data);
         }
       } catch (err) {
         console.error('语音识别请求失败', err);
-        message.error(err?.message || '语音识别请求失败');
+        // Handle HTTP-level errors (413 Payload Too Large, network errors, etc.)
+        const status = err?.response?.status;
+        const serverMsg = err?.response?.data?.message || '';
+        if (status === 413 || serverMsg.includes('too large')) {
+          message.error('录音文件过大,请缩短录音时长后重试（建议 30 秒以内）');
+        } else if (status === 408 || err?.code === 'ECONNABORTED') {
+          message.error('请求超时,请检查网络后重试');
+        } else if (!navigator.onLine) {
+          message.error('网络已断开,请恢复网络后重试');
+        } else {
+          message.error(serverMsg || err?.message || '语音识别请求失败');
+        }
       } finally {
         setUploading(false);
         setPageStatus?.(false);
