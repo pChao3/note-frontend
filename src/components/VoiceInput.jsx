@@ -144,6 +144,10 @@ function VoiceInputButton({ onSend, setPageStatus }) {
         message.warning('说话时间太短');
         return;
       }
+      if (result.tooLarge) {
+        message.error('录音文件过大,请缩短录音时长（建议 15 秒以内）');
+        return;
+      }
       sendAudio(result);
     },
     [cancelRecording, stopRecording, sendAudio]
