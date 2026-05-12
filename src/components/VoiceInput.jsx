@@ -45,7 +45,7 @@ function useIsTouchDevice() {
  *  - Live waveform + timer + permission error handling
  *  - Min 500ms / max 60s duration filters
  */
-function VoiceInputButton({ onSend, setPageStatus }) {
+function VoiceInputButton({ onSend, onClear, setPageStatus }) {
   const isTouch = useIsTouchDevice();
   const {
     startRecording,
@@ -86,6 +86,7 @@ function VoiceInputButton({ onSend, setPageStatus }) {
     async ({ blob, format }) => {
       setUploading(true);
       setPageStatus?.(true);
+      onClear?.();   // 请求前先清空上一次的内容
       try {
         const base64Audio = await blobToBase64(blob);
         const res = await getTextByVoice({ audioData: base64Audio, format });
@@ -128,7 +129,7 @@ function VoiceInputButton({ onSend, setPageStatus }) {
         markIdle();
       }
     },
-    [onSend, setPageStatus, markIdle]
+    [onSend, setPageStatus, markIdle, onClear]
   );
 
   const finishAndSend = useCallback(

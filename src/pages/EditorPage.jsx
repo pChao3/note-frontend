@@ -75,13 +75,18 @@ export default function EditorPage() {
     }
   };
 
+  const onClear = () => {
+    setTitle('');
+    setMood('happy');
+    setTag('');
+    setContent('');
+  };
+
   const onSend = data => {
-    // Append to existing content instead of overwriting, so repeated voice
-    // inputs accumulate. Fall back to direct overwrite if data is empty.
-    if (data?.title) setTitle(prev => prev || data.title);
+    if (data?.title) setTitle(data.title);
     if (data?.mood) setMood(data.mood);
-    if (data?.tag) setTag(prev => (prev ? `${prev},${data.tag}` : data.tag));
-    if (data?.content) setContent(prev => (prev ? `${prev}\n${data.content}` : data.content));
+    if (data?.tag) setTag(data.tag);
+    if (data?.content) setContent(data.content);
   };
 
   return (
@@ -174,7 +179,7 @@ export default function EditorPage() {
           </span>
 
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
-            <VoiceInputButton onSend={onSend} setPageStatus={e => setLoading(e)} />
+            <VoiceInputButton onSend={onSend} onClear={onClear} setPageStatus={e => setLoading(e)} />
             <Button
               type="primary"
               icon={<Save className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />}
