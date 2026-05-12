@@ -56,6 +56,7 @@ function VoiceInputButton({ onSend, setPageStatus }) {
     duration,
     volume,
     error,
+    markIdle,
   } = useVoiceInput({ maxDurationMs: MAX_DURATION_MS });
 
   const btnRef = useRef(null);
@@ -124,9 +125,10 @@ function VoiceInputButton({ onSend, setPageStatus }) {
       } finally {
         setUploading(false);
         setPageStatus?.(false);
+        markIdle();
       }
     },
-    [onSend, setPageStatus]
+    [onSend, setPageStatus, markIdle]
   );
 
   const finishAndSend = useCallback(
